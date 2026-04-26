@@ -8,7 +8,7 @@ A framework API mod for building addons for [AE2 Lightning Tech](https://github.
 
 ## About
 
-AE2LT Addon Framework provides a stable, versioned API surface so that third-party mods can integrate with AE2 Lightning Tech without depending on its internals. It exposes:
+AE2LT Addon Framework provides a stable, versioned API surface so that third-party mods can integrate with AE2 Lightning Tech without depending on its internals. In NeoForge terms, it is best treated as an **API / library mod**: a normal mod JAR loaded at runtime as a required dependency, while also serving as a developer-facing library at compile time. It exposes:
 
 - **NeoForge Capabilities** — query and transfer lightning energy (`ILightningEnergyHandler`) from any block or item
 - **Events** — hook into the lightning collection pipeline (`LightningCollectedEvent`)
@@ -107,7 +107,7 @@ repositories {
 
 dependencies {
     compileOnly fileTree(dir: 'libs', include: 'ae2lt_api-*.jar')
-    // or: compileOnly "com.qianchang:ae2lt_api:1.0.0"
+    // or: compileOnly "com.qianchang:ae2lt_api:0.3.2-snapshot"
 }
 ```
 
@@ -121,7 +121,7 @@ Declare the dependency in your `neoforge.mods.toml`:
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0,)"
+    versionRange = "[0.3.2,)"
     ordering = "AFTER"
     side = "BOTH"
 
@@ -140,7 +140,7 @@ Declare the dependency in your `neoforge.mods.toml`:
 ./gradlew build
 ```
 
-The output jar is placed in `build/libs/ae2lt_api-<version>.jar`.
+The output jar is placed in `build/libs/ae2lt_api-<version>.jar`, currently `build/libs/ae2lt_api-0.3.2-snapshot.jar`.
 
 ## Compatibility
 

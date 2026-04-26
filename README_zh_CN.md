@@ -8,7 +8,7 @@
 
 ## 关于
 
-AE2LT 附属框架提供了一套稳定、有版本管理的 API 层，让第三方模组能够与 AE2 闪电科技集成，而无需依赖其内部实现。框架暴露了以下能力：
+AE2LT 附属框架提供了一套稳定、有版本管理的 API 层，让第三方模组能够与 AE2 闪电科技集成，而无需依赖其内部实现。在 NeoForge 生态里，它更适合被视为一个 **API / library mod**：运行时它是一个正常加载的前置模组，编译期它又能作为开发库使用。框架暴露了以下能力：
 
 - **NeoForge 能力（Capability）** — 查询和传输任意方块或物品的闪电能量（`ILightningEnergyHandler`）
 - **事件** — 接入闪电收集流程（`LightningCollectedEvent`）
@@ -107,7 +107,7 @@ repositories {
 
 dependencies {
     compileOnly fileTree(dir: 'libs', include: 'ae2lt_api-*.jar')
-    // 或者: compileOnly "com.qianchang:ae2lt_api:1.0.0"
+    // 或者: compileOnly "com.qianchang:ae2lt_api:0.3.2-snapshot"
 }
 ```
 
@@ -121,7 +121,7 @@ dependencies {
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0,)"
+    versionRange = "[0.3.2,)"
     ordering = "AFTER"
     side = "BOTH"
 
@@ -140,7 +140,7 @@ dependencies {
 ./gradlew build
 ```
 
-输出 jar 位于 `build/libs/ae2lt_api-<版本号>.jar`。
+输出 jar 位于 `build/libs/ae2lt_api-<版本号>.jar`，当前构建结果为 `build/libs/ae2lt_api-0.3.2-snapshot.jar`。
 
 ## 兼容性
 
