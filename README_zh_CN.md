@@ -22,12 +22,11 @@ AE2LT 附属框架提供了一套稳定、有版本管理的 API 层，让第三
 
 ```java
 // 查询方块的闪电能量处理器
-ILightningEnergyHandler handler = AE2LTAPI.get().getLightningHandler(level, pos, direction);
-if (handler != null) {
-    long hv  = handler.getStoredHV();
-    long ehv = handler.getStoredEHV();
+AE2LTAPI.getInstance().getLightningHandler(level, pos, direction).ifPresent(handler -> {
+    long hv = handler.getLightningStored(LightningEnergyTier.HIGH_VOLTAGE);
+    long ehv = handler.getLightningStored(LightningEnergyTier.EXTREME_HIGH_VOLTAGE);
     handler.insertLightning(LightningEnergyTier.HIGH_VOLTAGE, 100, false);
-}
+});
 ```
 
 ### 注册插件
@@ -58,20 +57,20 @@ com.example.myaddon.MyAddonPlugin
 
 ```java
 // 闪电装配室
-JsonObject recipe = new LightningAssemblyRecipeBuilder()
-    .addInput("minecraft:iron_ingot", 4)
-    .setResult("mymod:overload_plate", 1)
-    .setTotalEnergy(1000)
-    .setLightningCost(8)
-    .setLightningTier(LightningEnergyTier.HIGH_VOLTAGE)
-    .build();
+JsonObject recipe = LightningAssemblyRecipeBuilder.create()
+    .input("minecraft:iron_ingot", 4)
+    .result("mymod:overload_plate", 1)
+    .totalEnergy(1000)
+    .lightningCost(8)
+    .lightningTier(LightningEnergyTier.HIGH_VOLTAGE)
+    .toJson();
 
 // 水晶催化器
-JsonObject recipe2 = new CrystalCatalyzerRecipeBuilder()
-    .setCatalyst("ae2:certus_quartz_crystal")
-    .setOutput("ae2lt:overload_crystal", 2)
-    .setEnergyPerCycle(64)
-    .build();
+JsonObject recipe2 = CrystalCatalyzerRecipeBuilder.create()
+    .catalyst("ae2:certus_quartz_crystal", 1)
+    .output("ae2lt:overload_crystal", 2)
+    .energyPerCycle(64)
+    .toJson();
 ```
 
 可用的构建器：

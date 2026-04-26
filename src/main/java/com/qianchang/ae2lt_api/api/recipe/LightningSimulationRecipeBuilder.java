@@ -2,6 +2,7 @@ package com.qianchang.ae2lt_api.api.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,9 @@ import java.util.Objects;
  *     { "ingredient": { "item": "minecraft:iron_ingot" }, "count": 4 }
  *   ],
  *   "result": { "id": "ae2lt:overload_alloy_blank", "count": 1 },
- *   "energy": 1000
+ *   "totalEnergy": 1000,
+ *   "lightningCost": 4,
+ *   "lightningTier": "high_voltage"
  * }
  * }</pre>
  */
@@ -32,7 +35,9 @@ public final class LightningSimulationRecipeBuilder {
     private final List<InputSpec> inputs = new ArrayList<>();
     private String resultItem;
     private int resultCount = 1;
-    private long energy = 1000;
+    private long totalEnergy = 1000;
+    private int lightningCost = 4;
+    private LightningEnergyTier lightningTier = LightningEnergyTier.HIGH_VOLTAGE;
     private int priority = 0;
 
     private LightningSimulationRecipeBuilder() {}
@@ -66,10 +71,27 @@ public final class LightningSimulationRecipeBuilder {
         return this;
     }
 
-    /** FE energy consumed per simulation run. */
+    /** Sets the total FE energy consumed per simulation run. */
+    public LightningSimulationRecipeBuilder totalEnergy(long totalEnergy) {
+        if (totalEnergy < 5) throw new IllegalArgumentException("totalEnergy must be at least 5");
+        this.totalEnergy = totalEnergy;
+        return this;
+    }
+
+    /** @deprecated Use {@link #totalEnergy(long)} to match AE2LT's current recipe schema. */
+    @Deprecated
     public LightningSimulationRecipeBuilder energy(long energy) {
-        if (energy < 0) throw new IllegalArgumentException("energy must be non-negative");
-        this.energy = energy;
+        return totalEnergy(energy);
+    }
+
+    public LightningSimulationRecipeBuilder lightningCost(int lightningCost) {
+        if (lightningCost <= 0) throw new IllegalArgumentException("lightningCost must be positive");
+        this.lightningCost = lightningCost;
+        return this;
+    }
+
+    public LightningSimulationRecipeBuilder lightningTier(LightningEnergyTier tier) {
+        this.lightningTier = Objects.requireNonNull(tier, "tier");
         return this;
     }
 
@@ -90,7 +112,9 @@ public final class LightningSimulationRecipeBuilder {
         result.addProperty("count", resultCount);
         json.add("result", result);
 
-        json.addProperty("energy", energy);
+        json.addProperty("totalEnergy", totalEnergy);
+        json.addProperty("lightningCost", lightningCost);
+        json.addProperty("lightningTier", lightningTier.getSerializedName());
 
         return json;
     }

@@ -5,10 +5,8 @@ import com.qianchang.ae2lt_api.api.AE2LTAPI;
 import com.qianchang.ae2lt_api.api.capability.AE2LTCapabilities;
 import com.qianchang.ae2lt_api.internal.PluginLoader;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 /**
@@ -29,9 +27,8 @@ public class AE2LTAddonFramework {
     public static final String MODID = "ae2lt_api";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public AE2LTAddonFramework(IEventBus modEventBus, ModContainer modContainer) {
+    public AE2LTAddonFramework(IEventBus modEventBus) {
         modEventBus.addListener(this::onCommonSetup);
-        NeoForge.EVENT_BUS.register(PluginLoader.class);
     }
 
     private void onCommonSetup(FMLCommonSetupEvent event) {

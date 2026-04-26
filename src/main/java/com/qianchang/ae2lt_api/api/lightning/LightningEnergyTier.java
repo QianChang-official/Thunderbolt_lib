@@ -12,10 +12,10 @@ import net.minecraft.util.StringRepresentable;
 public enum LightningEnergyTier implements StringRepresentable {
 
     /** High Voltage lightning — the base tier, produced by the Lightning Collector. */
-    HIGH_VOLTAGE("hv", "High Voltage", 1),
+    HIGH_VOLTAGE("high_voltage", "High Voltage", 1),
 
     /** Extreme High Voltage lightning — the refined tier, produced by the Tesla Coil. */
-    EXTREME_HIGH_VOLTAGE("ehv", "Extreme High Voltage", 2);
+    EXTREME_HIGH_VOLTAGE("extreme_high_voltage", "Extreme High Voltage", 2);
 
     private final String serializedName;
     private final String displayName;
@@ -27,7 +27,7 @@ public enum LightningEnergyTier implements StringRepresentable {
         this.level = level;
     }
 
-    /** The lowercase identifier used in recipe JSON (e.g. {@code "hv"}, {@code "ehv"}). */
+    /** The lowercase identifier used in recipe JSON (e.g. {@code "high_voltage"}). */
     @Override
     public String getSerializedName() {
         return serializedName;
@@ -57,6 +57,12 @@ public enum LightningEnergyTier implements StringRepresentable {
             if (tier.serializedName.equalsIgnoreCase(id)) {
                 return tier;
             }
+        }
+        if ("hv".equalsIgnoreCase(id)) {
+            return HIGH_VOLTAGE;
+        }
+        if ("ehv".equalsIgnoreCase(id)) {
+            return EXTREME_HIGH_VOLTAGE;
         }
         return HIGH_VOLTAGE;
     }

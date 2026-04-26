@@ -28,7 +28,7 @@ import java.util.Objects;
  *   "result": { "id": "ae2lt:overload_processor", "count": 1 },
  *   "totalEnergy": 500,
  *   "lightningCost": 4,
- *   "lightningTier": "hv"
+ *   "lightningTier": "high_voltage"
  * }
  * }</pre>
  */

@@ -22,12 +22,11 @@ AE2LT Addon Framework provides a stable, versioned API surface so that third-par
 
 ```java
 // Query a block's lightning energy handler
-ILightningEnergyHandler handler = AE2LTAPI.get().getLightningHandler(level, pos, direction);
-if (handler != null) {
-    long hv  = handler.getStoredHV();
-    long ehv = handler.getStoredEHV();
+AE2LTAPI.getInstance().getLightningHandler(level, pos, direction).ifPresent(handler -> {
+    long hv = handler.getLightningStored(LightningEnergyTier.HIGH_VOLTAGE);
+    long ehv = handler.getLightningStored(LightningEnergyTier.EXTREME_HIGH_VOLTAGE);
     handler.insertLightning(LightningEnergyTier.HIGH_VOLTAGE, 100, false);
-}
+});
 ```
 
 ### Registering a Plugin
@@ -58,20 +57,20 @@ All five AE2LT machine recipe types are covered:
 
 ```java
 // Lightning Assembly
-JsonObject recipe = new LightningAssemblyRecipeBuilder()
-    .addInput("minecraft:iron_ingot", 4)
-    .setResult("mymod:overload_plate", 1)
-    .setTotalEnergy(1000)
-    .setLightningCost(8)
-    .setLightningTier(LightningEnergyTier.HIGH_VOLTAGE)
-    .build();
+JsonObject recipe = LightningAssemblyRecipeBuilder.create()
+    .input("minecraft:iron_ingot", 4)
+    .result("mymod:overload_plate", 1)
+    .totalEnergy(1000)
+    .lightningCost(8)
+    .lightningTier(LightningEnergyTier.HIGH_VOLTAGE)
+    .toJson();
 
 // Crystal Catalyzer
-JsonObject recipe2 = new CrystalCatalyzerRecipeBuilder()
-    .setCatalyst("ae2:certus_quartz_crystal")
-    .setOutput("ae2lt:overload_crystal", 2)
-    .setEnergyPerCycle(64)
-    .build();
+JsonObject recipe2 = CrystalCatalyzerRecipeBuilder.create()
+    .catalyst("ae2:certus_quartz_crystal", 1)
+    .output("ae2lt:overload_crystal", 2)
+    .energyPerCycle(64)
+    .toJson();
 ```
 
 Builders available:
