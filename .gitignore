@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+repo/
+
+# IDEs
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.launch
+out/
+
+# NeoForge run directories
+run/
+run2/
+runs/
+
+# Eclipse
+bin/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Mod development libs (put ae2lt.jar here, don't commit it)
+libs/*.jar

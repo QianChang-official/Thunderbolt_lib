@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Client",
+      "presentation": {
+        "group": "Mod Development - ae2lt-addon-framework",
+        "order": 0
+      },
+      "projectName": "ae2lt-addon-framework",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\build\\moddev\\clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dae2lt_api%%C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Data",
+      "presentation": {
+        "group": "Mod Development - ae2lt-addon-framework",
+        "order": 1
+      },
+      "projectName": "ae2lt-addon-framework",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\build\\moddev\\dataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dae2lt_api%%C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Server",
+      "presentation": {
+        "group": "Mod Development - ae2lt-addon-framework",
+        "order": 2
+      },
+      "projectName": "ae2lt-addon-framework",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\build\\moddev\\serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dae2lt_api%%C:\\Users\\Administrator\\Desktop\\ae2lt-addon-framework\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}
