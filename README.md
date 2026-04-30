@@ -1,79 +1,31 @@
-# AE2LT Addon Framework
+# Thunderbolt_lib
 
 [中文文档](README_zh_CN.md)
 
-A framework API mod for building addons for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech) — an [Applied Energistics 2](https://github.com/AppliedEnergistics/Applied-Energistics-2) addon that introduces a lightning energy system, advanced machines, and overloaded network components.
+`Thunderbolt_lib` is the addon API and runtime bridge library for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech).
 
-> Requires AE2 Lightning Tech · Built for Minecraft 1.21.1 / NeoForge
+> Runtime mod id remains `ae2lt_api`.
+> Target versions: AE2 Lightning Tech 1.0.0+, Minecraft 1.21.1, NeoForge 21.1.x.
 
-## About
+## What It Provides
 
-AE2LT Addon Framework provides a stable, versioned API surface so that third-party mods can integrate with AE2 Lightning Tech without depending on its internals. In NeoForge terms, it is best treated as an **API / library mod**: a normal mod JAR loaded at runtime as a required dependency, while also serving as a developer-facing library at compile time. It exposes:
+- Lightning energy capability API: `ILightningEnergyHandler`
+- Runtime bridge for AE2LT lightning-connected machines
+- Collector interception event: `LightningCollectedEvent`
+- Recipe builders for current AE2LT machine and ritual recipe ids
+- Plugin loading via `@AE2LTPlugin`, `IAE2LTPlugin`, and `ServiceLoader`
+- Static helper facade: `AE2LTAPI`
 
-- **NeoForge Capabilities** — query and transfer lightning energy (`ILightningEnergyHandler`) from any block or item
-- **Events** — hook into the lightning collection pipeline (`LightningCollectedEvent`)
-- **Recipe Builders** — generate JSON for all five AE2LT machine recipe types via code
-- **Plugin System** — register your addon with `@AE2LTPlugin` + `IAE2LTPlugin` using Java `ServiceLoader`
-- **Static API entry point** — `AE2LTAPI` singleton for capability access without boilerplate
+## Runtime Naming
 
-## API Overview
+- Git repository / project name: `Thunderbolt_lib`
+- Built jar name: `Thunderbolt_lib-1.0.0.jar`
+- Runtime mod id: `ae2lt_api`
 
-### Lightning Energy Capability
+Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarations in `neoforge.mods.toml` and capability lookups.
 
-```java
-// Query a block's lightning energy handler
-AE2LTAPI.getInstance().getLightningHandler(level, pos, direction).ifPresent(handler -> {
-    long hv = handler.getLightningStored(LightningEnergyTier.HIGH_VOLTAGE);
-    long ehv = handler.getLightningStored(LightningEnergyTier.EXTREME_HIGH_VOLTAGE);
-    handler.insertLightning(LightningEnergyTier.HIGH_VOLTAGE, 100, false);
-});
-```
+## Current Recipe Coverage
 
-### Registering a Plugin
-
-1. Implement `IAE2LTPlugin` and annotate with `@AE2LTPlugin`:
-
-```java
-@AE2LTPlugin
-public class MyAddonPlugin implements IAE2LTPlugin {
-    @Override
-    public void onInitialize(AE2LTApiContext ctx) {
-        if (ctx.isAE2LTLoaded()) {
-            // register recipe data-gen, custom capabilities, etc.
-        }
-    }
-}
-```
-
-2. Register in `src/main/resources/META-INF/services/com.qianchang.ae2lt_api.api.plugin.IAE2LTPlugin`:
-
-```
-com.example.myaddon.MyAddonPlugin
-```
-
-### Recipe Builders
-
-All five AE2LT machine recipe types are covered:
-
-```java
-// Lightning Assembly
-JsonObject recipe = LightningAssemblyRecipeBuilder.create()
-    .input("minecraft:iron_ingot", 4)
-    .result("mymod:overload_plate", 1)
-    .totalEnergy(1000)
-    .lightningCost(8)
-    .lightningTier(LightningEnergyTier.HIGH_VOLTAGE)
-    .toJson();
-
-// Crystal Catalyzer
-JsonObject recipe2 = CrystalCatalyzerRecipeBuilder.create()
-    .catalyst("ae2:certus_quartz_crystal", 1)
-    .output("ae2lt:overload_crystal", 2)
-    .energyPerCycle(64)
-    .toJson();
-```
-
-Builders available:
 | Builder | Recipe type |
 |---------|-------------|
 | `LightningAssemblyRecipeBuilder` | `ae2lt:lightning_assembly` |
@@ -81,85 +33,38 @@ Builders available:
 | `LightningSimulationRecipeBuilder` | `ae2lt:lightning_simulation` |
 | `OverloadProcessingRecipeBuilder` | `ae2lt:overload_processing` |
 | `CrystalCatalyzerRecipeBuilder` | `ae2lt:crystal_catalyzer` |
+| `LightningStrikeRecipeBuilder` | `ae2lt:lightning_strike` |
 
-### Events
-
-```java
-@SubscribeEvent
-public static void onLightningCollected(LightningCollectedEvent event) {
-    event.setHvAmount(event.getHvAmount() * 2); // double all HV yield
-    // event.setCanceled(true);  // cancel collection entirely
-}
-```
-
-## Getting Started
-
-### Dependency Setup (Gradle)
-
-Add this mod as a `compileOnly` dependency in your addon's build.gradle:
-
-```groovy
-repositories {
-    // Option A: place ae2lt_api-*.jar in your libs/ folder
-    // Option B: publish to local maven and reference via mavenLocal()
-}
-
-dependencies {
-    compileOnly fileTree(dir: 'libs', include: 'ae2lt_api-*.jar')
-    // or: compileOnly "com.qianchang:ae2lt_api:0.3.2-snapshot"
-}
-```
-
-> The framework JAR is available in the [Releases](../../releases) section.
-
-### Runtime Dependency
-
-Declare the dependency in your `neoforge.mods.toml`:
+## Dependency Example
 
 ```toml
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[0.3.2,)"
+    versionRange = "[1.0.0,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.your_mod_id]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[0.3,)"
+    versionRange = "[1.0.0,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
 
-## Building
+## Build Output
 
 ```bash
-# Requires Java 21 and the AE2LT jar in libs/ for full builds
 ./gradlew build
 ```
 
-The output jar is placed in `build/libs/ae2lt_api-<version>.jar`, currently `build/libs/ae2lt_api-0.3.2-snapshot.jar`.
+```text
+build/libs/Thunderbolt_lib-1.0.0.jar
+```
 
-## Compatibility
+## Disclaimer
 
-| Dependency | Version |
-|-----------|---------|
-| Minecraft | 1.21.1 |
-| NeoForge | 21.1.x |
-| AE2 Lightning Tech | ≥ 0.3 |
-| Applied Energistics 2 | Any 1.21.1 release |
+This name is used for non-commercial community purposes only. If the name is considered infringing or unsuitable by any rights holder, contact the maintainer and it will be changed promptly.
 
-## Issues
-
-Found a bug or missing API surface? Please open an issue with your Minecraft / NeoForge / AE2LT / AE2LT Addon Framework versions and a clear description.
-
-## License
-
-AE2LT Addon Framework is licensed under the [MIT License](LICENSE).
-
-## Credits
-
-Developed by **QianChang**.
-
-Built on top of [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech) by MOAKIEE, CystrySU, gjmhmm8, _leng, TedXenon, MHanHanBing and the [Applied Energistics 2](https://github.com/AppliedEnergistics/Applied-Energistics-2) team.
+Full notice: [DISCLAIMER.md](DISCLAIMER.md)

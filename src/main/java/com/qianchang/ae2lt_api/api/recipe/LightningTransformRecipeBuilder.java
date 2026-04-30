@@ -110,7 +110,7 @@ public final class LightningTransformRecipeBuilder {
         if (resultItem == null) throw new IllegalStateException("A result item must be set");
 
         JsonObject json = new JsonObject();
-        json.addProperty("type", "ae2lt:lightning_transform");
+        json.addProperty("type", AE2LTRecipeTypes.LIGHTNING_TRANSFORM);
         if (priority != 0) json.addProperty("priority", priority);
 
         JsonArray inputsArray = new JsonArray();
@@ -142,3 +142,4 @@ public final class LightningTransformRecipeBuilder {
         }
     }
 }
+

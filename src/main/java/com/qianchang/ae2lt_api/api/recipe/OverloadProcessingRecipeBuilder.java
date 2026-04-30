@@ -143,7 +143,7 @@ public final class OverloadProcessingRecipeBuilder {
         }
 
         JsonObject json = new JsonObject();
-        json.addProperty("type", "ae2lt:overload_processing");
+        json.addProperty("type", AE2LTRecipeTypes.OVERLOAD_PROCESSING);
         if (priority != 0) json.addProperty("priority", priority);
 
         if (!inputs.isEmpty()) {
@@ -209,3 +209,4 @@ public final class OverloadProcessingRecipeBuilder {
         }
     }
 }
+

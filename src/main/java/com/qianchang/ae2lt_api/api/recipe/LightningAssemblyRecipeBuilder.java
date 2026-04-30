@@ -109,7 +109,7 @@ public final class LightningAssemblyRecipeBuilder {
         if (resultItem == null) throw new IllegalStateException("A result item must be set");
 
         JsonObject json = new JsonObject();
-        json.addProperty("type", "ae2lt:lightning_assembly");
+        json.addProperty("type", AE2LTRecipeTypes.LIGHTNING_ASSEMBLY);
         if (priority != 0) json.addProperty("priority", priority);
 
         JsonArray inputsArray = new JsonArray();
@@ -145,3 +145,4 @@ public final class LightningAssemblyRecipeBuilder {
         }
     }
 }
+

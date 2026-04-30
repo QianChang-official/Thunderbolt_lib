@@ -100,7 +100,7 @@ public final class CrystalCatalyzerRecipeBuilder {
         if (outputItem == null) throw new IllegalStateException("An output item must be set");
 
         JsonObject json = new JsonObject();
-        json.addProperty("type", "ae2lt:crystal_catalyzer");
+        json.addProperty("type", AE2LTRecipeTypes.CRYSTAL_CATALYZER);
 
         if (catalystItem != null || catalystTag != null) {
             JsonObject catalyst = new JsonObject();
@@ -123,3 +123,4 @@ public final class CrystalCatalyzerRecipeBuilder {
         return json;
     }
 }
+

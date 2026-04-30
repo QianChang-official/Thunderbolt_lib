@@ -8,7 +8,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = mod_id
+    archivesName = project.findProperty("artifact_name") ?: mod_id
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -114,3 +114,4 @@ if (plugins.hasPlugin('idea')) {
         }
     }
 }
+

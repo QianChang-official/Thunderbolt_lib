@@ -28,7 +28,7 @@ package com.qianchang.ae2lt_api.api.plugin;
 public interface IAE2LTPlugin {
 
     /**
-     * Called when the AE2LT Addon Framework has finished its setup.
+     * Called when the Thunderbolt_lib has finished its setup.
      * Use this method to perform any initialization that depends on
      * the framework or AE2LT being loaded.
      *
@@ -36,3 +36,4 @@ public interface IAE2LTPlugin {
      */
     default void onInitialize(AE2LTApiContext ctx) {}
 }
+

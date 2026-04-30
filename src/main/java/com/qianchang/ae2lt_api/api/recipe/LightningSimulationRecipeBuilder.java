@@ -100,7 +100,7 @@ public final class LightningSimulationRecipeBuilder {
         if (resultItem == null) throw new IllegalStateException("A result item must be set");
 
         JsonObject json = new JsonObject();
-        json.addProperty("type", "ae2lt:lightning_simulation");
+        json.addProperty("type", AE2LTRecipeTypes.LIGHTNING_SIMULATION);
         if (priority != 0) json.addProperty("priority", priority);
 
         JsonArray inputsArray = new JsonArray();
@@ -134,3 +134,4 @@ public final class LightningSimulationRecipeBuilder {
         }
     }
 }
+

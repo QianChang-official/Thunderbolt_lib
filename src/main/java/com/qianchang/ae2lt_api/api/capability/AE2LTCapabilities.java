@@ -7,7 +7,7 @@ import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Central registry of NeoForge capabilities exposed by the AE2LT Addon Framework.
+ * Central registry of NeoForge capabilities exposed by the Thunderbolt_lib.
  *
  * <h2>Lightning Energy Capability</h2>
  * <p>Register {@link #LIGHTNING_ENERGY_BLOCK} on your block entity to participate in the
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public final class AE2LTCapabilities {
 
     /** Current API version — bump when breaking changes are introduced. */
-    public static final String API_VERSION = "0.3.2-snapshot";
+    public static final String API_VERSION = "1.0.0";
 
     /**
      * Sided block capability for lightning energy I/O.
@@ -56,3 +56,5 @@ public final class AE2LTCapabilities {
 
     private AE2LTCapabilities() {}
 }
+
+
