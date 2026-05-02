@@ -25,13 +25,15 @@ final class AE2LTReflection {
     private static final String COMMON_CONFIG_CLASS = "com.moakiee.ae2lt.config.AE2LTCommonConfig";
     private static final String LIGHTNING_COLLECTOR_CLASS = "com.moakiee.ae2lt.blockentity.LightningCollectorBlockEntity";
 
+    // AE2LT 1.0.2 publicly registers LIGHTNING_ENERGY_BLOCK on these five
+    // grid-connected machines. Crystal Catalyzer runs on FE only, so it is
+    // intentionally excluded.
     private static final List<ResourceLocation> BRIDGED_BLOCK_ENTITY_IDS = List.of(
             ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_collector"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_simulation_room"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_assembly_chamber"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "overload_processing_factory"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "tesla_coil"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "crystal_catalyzer"));
+            ResourceLocation.fromNamespaceAndPath("ae2lt", "tesla_coil"));
 
     private AE2LTReflection() {
     }

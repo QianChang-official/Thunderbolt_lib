@@ -17,36 +17,49 @@ import java.util.Objects;
  * <p>If no catalyst is specified, the catalyst slot must be empty for this recipe
  * to match.</p>
  *
- * <h2>JSON output example (with catalyst)</h2>
+ * <h2>JSON output example (item output)</h2>
  * <pre>{@code
  * {
  *   "type": "ae2lt:crystal_catalyzer",
- *   "catalyst": { "item": "ae2lt:overload_crystal" },
+ *   "catalyst": { "item": "minecraft:amethyst_block" },
  *   "catalystCount": 1,
- *   "output": { "id": "ae2lt:overload_crystal_dust", "count": 4 },
- *   "energyPerCycle": 100
+ *   "output": { "id": "minecraft:amethyst_shard", "count": 1 },
+ *   "energyPerCycle": 100000
  * }
  * }</pre>
  *
- * <h2>JSON output example (no catalyst)</h2>
+ * <h2>JSON output example (dust mode + tag output)</h2>
  * <pre>{@code
  * {
  *   "type": "ae2lt:crystal_catalyzer",
- *   "output": { "id": "minecraft:quartz", "count": 1 },
- *   "energyPerCycle": 50
+ *   "mode": "dust",
+ *   "catalyst": { "item": "minecraft:amethyst_block" },
+ *   "catalystCount": 1,
+ *   "output": { "tag": "c:dusts/amethyst", "count": 1 },
+ *   "energyPerCycle": 100000
  * }
  * }</pre>
  */
 public final class CrystalCatalyzerRecipeBuilder {
+
+    /**
+     * Standard catalyzer modes recognised by AE2LT 1.0.2.
+     */
+    public static final String MODE_DUST = "dust";
 
     @Nullable
     private String catalystItem;
     @Nullable
     private String catalystTag;
     private int catalystCount = 1;
+    @Nullable
     private String outputItem;
+    @Nullable
+    private String outputTag;
     private int outputCount = 1;
     private int energyPerCycle = 100;
+    @Nullable
+    private String mode;
 
     private CrystalCatalyzerRecipeBuilder() {}
 
@@ -83,8 +96,34 @@ public final class CrystalCatalyzerRecipeBuilder {
     /** Sets the output item produced per cycle. */
     public CrystalCatalyzerRecipeBuilder output(String itemId, int count) {
         this.outputItem = Objects.requireNonNull(itemId, "itemId");
+        this.outputTag = null;
         this.outputCount = count;
         return this;
+    }
+
+    /**
+     * Sets the output as a tag-based stack. Used by AE2LT's "dust" mode where
+     * the produced item is resolved against an item tag (e.g. {@code c:dusts/amethyst}).
+     */
+    public CrystalCatalyzerRecipeBuilder outputTag(String tagId, int count) {
+        this.outputTag = Objects.requireNonNull(tagId, "tagId");
+        this.outputItem = null;
+        this.outputCount = count;
+        return this;
+    }
+
+    /**
+     * Sets a free-form mode string (e.g. {@link #MODE_DUST "dust"}). When unset
+     * the recipe is a regular catalyzer recipe; passing {@code null} clears it.
+     */
+    public CrystalCatalyzerRecipeBuilder mode(@Nullable String mode) {
+        this.mode = mode;
+        return this;
+    }
+
+    /** Convenience: enables AE2LT's {@code dust} catalyzer mode. */
+    public CrystalCatalyzerRecipeBuilder dustMode() {
+        return mode(MODE_DUST);
     }
 
     /**
@@ -97,10 +136,15 @@ public final class CrystalCatalyzerRecipeBuilder {
     }
 
     public JsonObject toJson() {
-        if (outputItem == null) throw new IllegalStateException("An output item must be set");
+        if (outputItem == null && outputTag == null) {
+            throw new IllegalStateException("An output item or tag must be set");
+        }
 
         JsonObject json = new JsonObject();
         json.addProperty("type", AE2LTRecipeTypes.CRYSTAL_CATALYZER);
+        if (mode != null) {
+            json.addProperty("mode", mode);
+        }
 
         if (catalystItem != null || catalystTag != null) {
             JsonObject catalyst = new JsonObject();
@@ -114,7 +158,11 @@ public final class CrystalCatalyzerRecipeBuilder {
         }
 
         JsonObject output = new JsonObject();
-        output.addProperty("id", outputItem);
+        if (outputItem != null) {
+            output.addProperty("id", outputItem);
+        } else {
+            output.addProperty("tag", outputTag);
+        }
         output.addProperty("count", outputCount);
         json.add("output", output);
 
@@ -123,4 +171,3 @@ public final class CrystalCatalyzerRecipeBuilder {
         return json;
     }
 }
-

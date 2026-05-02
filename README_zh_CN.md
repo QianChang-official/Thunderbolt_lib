@@ -5,35 +5,52 @@
 `Thunderbolt_lib` 是 [AE2-Lightning-Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech) 的 addon API 与运行时桥接库。
 
 > 运行时 `mod_id` 仍然保留为 `ae2lt_api`。
-> 对标版本：AE2 Lightning Tech 1.0.0+、Minecraft 1.21.1、NeoForge 21.1.x。
+> 对标版本：AE2 Lightning Tech 1.0.0+（已按 1.0.2 配方 Schema 对齐），Minecraft 1.21.1，NeoForge 21.1.x。
+> 最新版本:**1.0.2** —— 详见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 提供的能力
 
-- 闪电能量 Capability API：`ILightningEnergyHandler`
-- AE2LT 闪电联网机器的运行时桥接
-- 避雷收电拦截事件：`LightningCollectedEvent`
+- 闪电能量 Capability API:`ILightningEnergyHandler`
+- AE2LT 闪电联网机器的运行时桥接(共 5 个并网方块实体,见下方)
+- 避雷收电拦截事件:`LightningCollectedEvent`
 - 当前 AE2LT 机器与仪式配方的构建器
 - `@AE2LTPlugin`、`IAE2LTPlugin`、`ServiceLoader` 插件加载
-- 静态辅助门面：`AE2LTAPI`
+- 静态辅助门面:`AE2LTAPI`
+
+## 运行时桥接覆盖
+
+`AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK` 桥接的是 AE2LT 1.0.2 公开暴露的 5 个并网机器:
+
+| 方块实体 id | 角色 |
+|------------|------|
+| `ae2lt:lightning_collector` | 收集自然 / 人造闪电 |
+| `ae2lt:lightning_simulation_room` | 模拟雷击,用于配方制造 |
+| `ae2lt:lightning_assembly_chamber` | 闪电 + 物品输入合成 |
+| `ae2lt:overload_processing_factory` | 高负载闪电处理 |
+| `ae2lt:tesla_coil` | 闪电能量释放 |
+
+`ae2lt:crystal_catalyzer` 仅使用 FE,不属于闪电能量桥接范围,故有意排除。
 
 ## 当前命名策略
 
-- 仓库 / 项目名：`Thunderbolt_lib`
-- 构建 Jar 名：`Thunderbolt_lib-1.0.0.jar`
-- 运行时模组 id：`ae2lt_api`
+- 仓库 / 项目名:`Thunderbolt_lib`
+- 构建 Jar 名:`Thunderbolt_lib-1.0.2.jar`
+- 运行时模组 id:`ae2lt_api`
 
 保留 `mod_id = ae2lt_api` 的原因是避免现有 addon 的 `neoforge.mods.toml` 依赖声明、Capability 查询和兼容代码直接失效。
 
 ## 当前配方覆盖
 
-| 构建器 | 配方类型 |
-|--------|---------|
-| `LightningAssemblyRecipeBuilder` | `ae2lt:lightning_assembly` |
-| `LightningTransformRecipeBuilder` | `ae2lt:lightning_transform` |
-| `LightningSimulationRecipeBuilder` | `ae2lt:lightning_simulation` |
-| `OverloadProcessingRecipeBuilder` | `ae2lt:overload_processing` |
-| `CrystalCatalyzerRecipeBuilder` | `ae2lt:crystal_catalyzer` |
-| `LightningStrikeRecipeBuilder` | `ae2lt:lightning_strike` |
+| 构建器 | 配方类型 | 备注 |
+|--------|---------|------|
+| `LightningAssemblyRecipeBuilder` | `ae2lt:lightning_assembly` | 多输入 + 闪电等级 + 总能量 |
+| `LightningTransformRecipeBuilder` | `ae2lt:lightning_transform` | 简单输入 → 结果 |
+| `LightningSimulationRecipeBuilder` | `ae2lt:lightning_simulation` | 多输入 + 闪电等级 + 总能量 |
+| `OverloadProcessingRecipeBuilder` | `ae2lt:overload_processing` | 物品 + 可选输入流体 + 多结果 |
+| `CrystalCatalyzerRecipeBuilder` | `ae2lt:crystal_catalyzer` | 催化槽,物品或 tag 输出,支持 `dust` 模式 |
+| `LightningStrikeRecipeBuilder` | `ae2lt:lightning_strike` | 多方块仪式,由闪电触发 |
+
+`CrystalCatalyzerRecipeBuilder` 已对齐 AE2LT 1.0.2 的 `crystal_catalyzer/dust/*.json` 文件:调用 `dustMode()`(或 `mode("dust")`)再配合 `outputTag(tagId, count)` 即可输出 tag 解析后的物品堆。
 
 ## 依赖示例
 
@@ -60,11 +77,19 @@
 ```
 
 ```text
-build/libs/Thunderbolt_lib-1.0.0.jar
+build/libs/Thunderbolt_lib-1.0.2.jar
 ```
+
+## 版本说明
+
+本项目跟随 AE2 Lightning Tech 的发布节奏。详见 [CHANGELOG.md](CHANGELOG.md)。
+
+- `1.0.2` —— 跟进 AE2LT 1.0.2 发布版本号,内容与 1.0.1 完全一致。
+- `1.0.1` —— 按 AE2LT 1.0.2 配方 Schema 对齐 API(Crystal Catalyzer dust 模式 + tag 输出,桥接列表修正为 5 个 BE)。
+- `1.0.0` —— Thunderbolt_lib 初次发布,对齐 AE2LT 1.0.0。
 
 ## 免责声明
 
-本名称仅用于非商业社区用途。如名称被任何权利人认为涉嫌侵权或不适宜继续使用，请联系维护者，收到通知后会第一时间更名或修改。
+本名称仅用于非商业社区用途。如名称被任何权利人认为涉嫌侵权或不适宜继续使用,请联系维护者,收到通知后会第一时间更名或修改。
 
-完整说明见：[DISCLAIMER.md](DISCLAIMER.md)
+完整说明见:[DISCLAIMER.md](DISCLAIMER.md)
