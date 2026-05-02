@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 public final class AE2LTCapabilities {
 
     /** Current API version — bump when breaking changes are introduced. */
-    public static final String API_VERSION = "1.0.1";
+    public static final String API_VERSION = "1.0.2";
 
     /**
      * Sided block capability for lightning energy I/O.
