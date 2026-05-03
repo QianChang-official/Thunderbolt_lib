@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-05-03
+
+### Added
+- `com.qianchang.ae2lt_api.api.ids.AE2LTBlockEntityIds` — frozen `ResourceLocation` constants for the six AE2LT block entities, plus `LIGHTNING_GRID_MEMBERS` list capturing the five lightning-grid-connected ones.
+- `com.qianchang.ae2lt_api.api.ids.AE2LTRecipeIds` — frozen `ResourceLocation` constants for the six AE2LT recipe types.
+- `com.qianchang.ae2lt_api.api.bridge.AE2LTNativeBridge` — runtime detection and namespace helpers for AE2LT 1.0.3's own first-party API package (`com.moakiee.ae2lt.api`).
+- `LightningEnergyTier.CODEC` (Mojang `Codec`) and `LightningEnergyTier.STREAM_CODEC` (vanilla `StreamCodec<RegistryFriendlyByteBuf, _>`), wire-format-compatible with AE2LT's first-party `LightningTier`.
+- `LightningEnergyTier.fromOrdinal(int)` static decoder for packet round-trips.
+- `LightningCollectedEvent.isNaturalWeather()` and the matching 5-arg constructor; the existing 4-arg constructor is preserved and defaults `naturalWeather` to `false`.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.3` to track the AE2LT 1.0.3 release line.
+- `AE2LTCapabilities` Javadoc now documents the deliberate namespace split between `ae2lt_api:lightning_energy` (this library) and AE2LT's own `ae2lt:lightning_energy` (1.0.2+).
+- `AE2LTLightningCollectorEventBridge` now propagates the natural-weather flag through to `LightningCollectedEvent`.
+
+### Compatibility
+- All 1.0.2 API symbols and behavior preserved; this is a purely additive release. Existing addons recompile unchanged.
+
 ## [1.0.2] - 2026-05-03
 
 ### Changed
@@ -37,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.3]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.3
 [1.0.2]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.2
 [1.0.1]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.1
 [1.0.0]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.0

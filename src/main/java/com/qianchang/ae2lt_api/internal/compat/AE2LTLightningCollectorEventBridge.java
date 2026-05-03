@@ -74,7 +74,7 @@ final class AE2LTLightningCollectorEventBridge {
         long ehvAmount = tier == LightningEnergyTier.EXTREME_HIGH_VOLTAGE ? rolledOutput : 0L;
 
         LightningCollectedEvent collectedEvent =
-                new LightningCollectedEvent(serverLevel, collector.getBlockPos(), hvAmount, ehvAmount);
+                new LightningCollectedEvent(serverLevel, collector.getBlockPos(), hvAmount, ehvAmount, naturalWeatherLightning);
         NeoForge.EVENT_BUS.post(collectedEvent);
 
         if (collectedEvent.isCanceled()) {

@@ -21,23 +21,59 @@ import net.neoforged.bus.api.ICancellableEvent;
  *     event.setHvAmount(event.getHvAmount() * 2); // double the yield
  * }
  * }</pre>
+ *
+ * <h2>Relationship to AE2LT 1.0.3's first-party event</h2>
+ * <p>AE2LT 1.0.3 introduced its own {@code com.moakiee.ae2lt.api.event.LightningCollectedEvent}.
+ * The two events are <em>not</em> the same Java type and fire from different
+ * code paths: the library event continues to fire from the Thunderbolt_lib
+ * collector bridge, while AE2LT's first-party event fires from AE2LT's own
+ * {@code captureLightning}. Subscribing to both is safe and idempotent. The
+ * {@link #isNaturalWeather()} flag (added in 1.0.3) mirrors the same flag on
+ * AE2LT's first-party event for parity.</p>
  */
 public class LightningCollectedEvent extends Event implements ICancellableEvent {
 
     private final ServerLevel level;
     private final BlockPos collectorPos;
+    private final boolean naturalWeather;
     private long hvAmount;
     private long ehvAmount;
 
+    /**
+     * Backward-compatible constructor. {@link #isNaturalWeather()} will report
+     * {@code false} when this constructor is used.
+     */
     public LightningCollectedEvent(
             ServerLevel level,
             BlockPos collectorPos,
             long hvAmount,
             long ehvAmount) {
+        this(level, collectorPos, hvAmount, ehvAmount, false);
+    }
+
+    /**
+     * Full constructor.
+     *
+     * @param level          server level the strike occurred in
+     * @param collectorPos   block position of the collector that captured the strike
+     * @param hvAmount       initial HV amount that will be inserted (clamped to 0)
+     * @param ehvAmount      initial EHV amount that will be inserted (clamped to 0)
+     * @param naturalWeather whether the underlying lightning came from a natural
+     *                       thunderstorm (vs a tagged trigger such as the
+     *                       Lightning Rod or an Overload TNT explosion)
+     * @since 1.0.3
+     */
+    public LightningCollectedEvent(
+            ServerLevel level,
+            BlockPos collectorPos,
+            long hvAmount,
+            long ehvAmount,
+            boolean naturalWeather) {
         this.level = level;
         this.collectorPos = collectorPos;
-        this.hvAmount = hvAmount;
-        this.ehvAmount = ehvAmount;
+        this.hvAmount = Math.max(0, hvAmount);
+        this.ehvAmount = Math.max(0, ehvAmount);
+        this.naturalWeather = naturalWeather;
     }
 
     /** The server level in which the lightning struck. */
@@ -48,6 +84,24 @@ public class LightningCollectedEvent extends Event implements ICancellableEvent 
     /** The block position of the collector that captured the strike. */
     public BlockPos getCollectorPos() {
         return collectorPos;
+    }
+
+    /**
+     * Whether the underlying lightning came from a natural thunderstorm.
+     *
+     * <p>{@code true} for organic, weather-driven strikes. {@code false} for
+     * lightning produced by an item-tagged trigger (Lightning Rod, Overload TNT,
+     * or any third-party trigger that posts the strike with the
+     * {@code ae2lt.tagged_lightning} marker).</p>
+     *
+     * <p>Defaults to {@code false} when the event was constructed with the legacy
+     * 4-argument constructor, so older callers still produce a well-defined
+     * value.</p>
+     *
+     * @since 1.0.3
+     */
+    public boolean isNaturalWeather() {
+        return naturalWeather;
     }
 
     /** High Voltage energy that will be added to the collector. */

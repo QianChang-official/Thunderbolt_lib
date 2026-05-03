@@ -20,9 +20,24 @@
 - 插件发现入口
 - 第三方 addon 的低耦合集成层
 
-## 2. 本次调整(1.0.1 / 1.0.2)
+## 2. 本次调整(1.0.3)
 
-在原有跟进 AE2LT 1.0.0 能力面的基础上,本轮针对 AE2LT 1.0.2 的实际接口做了精确对齐:
+AE2LT 自身在 1.0.2 引入了 first-party API 包 `com.moakiee.ae2lt.api`(命名空间 `ae2lt`),并在 1.0.3 修复了若干联机崩服与渲染 / 闪电烧物问题。本次 1.0.3 对齐升级**纯加法、零破坏性变更**,做了下面几件事:
+
+- 版本从 `1.0.2` 升级为 `1.0.3`
+- 构建产物改为 `Thunderbolt_lib-1.0.3.jar`
+- 新增 `api/ids/AE2LTBlockEntityIds`(6 个 BE id 常量 + `LIGHTNING_GRID_MEMBERS` 列表)
+- 新增 `api/ids/AE2LTRecipeIds`(6 个配方类型常量)
+- 新增 `api/bridge/AE2LTNativeBridge`,在运行时探测 AE2LT 自带 API 是否存在,并暴露两个命名空间(`ae2lt` / `ae2lt_api`)
+- `LightningEnergyTier` 增加 `CODEC`(Mojang)与 `STREAM_CODEC`(`RegistryFriendlyByteBuf`),并新增 `fromOrdinal(int)`,与 AE2LT 自带 `LightningTier` 的线格式互通
+- `LightningCollectedEvent` 增加 `isNaturalWeather()` 与对应 5 参构造,旧 4 参构造保留并默认 `false`
+- 收电桥接(`AE2LTLightningCollectorEventBridge`)向新事件构造透传 `naturalWeather` 信息
+- `AE2LTCapabilities.API_VERSION` 同步升级到 `1.0.3`
+- 中英文 README 与项目对照说明同步更新
+
+### 2.1 之前的调整(1.0.1 / 1.0.2)
+
+在原有跟进 AE2LT 1.0.0 能力面的基础上,1.0.1 / 1.0.2 针对 AE2LT 1.0.2 的实际接口做了精确对齐:
 
 - 版本从 `1.0.0` 升级为 `1.0.1`,随后再升级为 `1.0.2`(内容与 1.0.1 完全一致,仅版本号变更)
 - 构建产物改为 `Thunderbolt_lib-1.0.1.jar` 与 `Thunderbolt_lib-1.0.2.jar`
@@ -31,7 +46,7 @@
 - `AE2LTCapabilities.API_VERSION` 同步升级
 - 中英文 README 与项目对照说明同步更新
 
-### 2.1 之前的调整(1.0.0)
+### 2.2 之前的调整(1.0.0)
 
 - 版本从 `0.4.0-snapshot` 调整为 `1.0.0`
 - 构建产物改为 `Thunderbolt_lib-1.0.0.jar`
@@ -61,19 +76,25 @@
 - `LightningStrikeRecipeBuilder`:补齐主模组现有 `lightning_strike` 配方构建器
 - `CrystalCatalyzerRecipeBuilder`:支持普通模式与 `dust` 模式,输出可为 item id 或 tag id(对齐 1.0.2 schema)
 - `internal.compat`:AE2LT 5 个并网机器的运行时桥接层(Lightning Collector / Simulation Room / Assembly Chamber / Overload Processing Factory / Tesla Coil)
-- `LightningCollectedEvent`:在 collector 收电流程里真实可拦截
+- `LightningCollectedEvent`:在 collector 收电流程里真实可拦截,1.0.3 起携带 `naturalWeather` 标识
+- `AE2LTBlockEntityIds` / `AE2LTRecipeIds`:1.0.3 起暴露的冻结 ID 常量
+- `AE2LTNativeBridge`:1.0.3 起暴露的 AE2LT 自带 API 探测助手
+- `LightningEnergyTier.CODEC` / `STREAM_CODEC`:1.0.3 起暴露的 Mojang Codec 与网络 StreamCodec
 - 中英文 README 与独立免责声明同步更新
 
 ## 5. 建议继续测试的重点
 
-- `Thunderbolt_lib-1.0.2.jar` 与 `ae2lt-1.0.2.jar` 同时加载是否稳定
+- `Thunderbolt_lib-1.0.3.jar` 与 `ae2lt-1.0.3.jar` 同时加载是否稳定
 - `AE2LTAPI.getLightningHandler(...)` 是否仍能正确桥接 5 个并网机器
-- `LightningCollectedEvent` 改值 / 取消后是否真正影响收电结果
-- `CrystalCatalyzerRecipeBuilder.dustMode()` 配合 `outputTag(...)` 生成的 JSON 是否能被 AE2LT 1.0.2 的 `crystal_catalyzer/dust/*` schema 正确识别
+- `LightningCollectedEvent` 改值 / 取消后是否真正影响收电结果,且 `isNaturalWeather()` 在自然雷暴 vs 命令触发雷击时是否区分正确
+- `LightningEnergyTier.STREAM_CODEC` 与 AE2LT `LightningTier.STREAM_CODEC` 之间能否做到 ordinal 级别互通
+- `CrystalCatalyzerRecipeBuilder.dustMode()` 配合 `outputTag(...)` 生成的 JSON 是否能被 AE2LT 1.0.2 / 1.0.3 的 `crystal_catalyzer/dust/*` schema 正确识别
 - `LightningStrikeRecipeBuilder` 生成的 JSON 是否能被 AE2LT 正确识别
-- 旧 addon 若依赖 `ae2lt_api` 1.0.0,在升级到 1.0.2 后仍然兼容(API 表面无破坏性变更)
+- 旧 addon 若依赖 `ae2lt_api` 1.0.0 / 1.0.2,在升级到 1.0.3 后仍然兼容(API 表面只做新增,未删/未改既有签名)
+- `AE2LTNativeBridge.isNativeApiAvailable()` 在 AE2LT 1.0.2+ 装载 / 缺席两种情况下分别返回 true / false
 
 ## 6. 已知约束
 
 - 本仓库 `libs/ae2lt-1.0.2.jar` 仅包含资源(无 .class),开发期编译依赖完全由反射桥接覆盖,不需要类文件
-- 真正的运行时联调需要在最终用户的 Minecraft 实例中,与完整版 AE2LT 1.0.2 一同加载
+- 真正的运行时联调需要在最终用户的 Minecraft 实例中,与完整版 AE2LT 1.0.3 一同加载
+- AE2LT 1.0.3 自带的 first-party API(`com.moakiee.ae2lt.api`)与本库的 API(`com.qianchang.ae2lt_api.api`)是两套独立命名空间,不会自动转换;`AE2LTNativeBridge` 仅提供探测,不做隐式桥接
