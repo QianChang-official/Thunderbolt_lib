@@ -12,9 +12,17 @@ import org.jetbrains.annotations.Nullable;
  * <h2>Lightning Energy Capability</h2>
  * <p>Register {@link #LIGHTNING_ENERGY_BLOCK} on your block entity to participate in the
  * AE2 Lightning Tech energy network. The five lightning-grid machines published by
- * AE2LT 1.0.2 (Lightning Collector, Lightning Simulation Room, Lightning Assembly
+ * AE2LT 1.0.2+ (Lightning Collector, Lightning Simulation Room, Lightning Assembly
  * Chamber, Overload Processing Factory, Tesla Coil) automatically query this
  * capability when looking for lightning energy sources or sinks adjacent to them.</p>
+ *
+ * <h2>Relationship to AE2LT 1.0.3's first-party API</h2>
+ * <p>AE2LT 1.0.2 / 1.0.3 introduced its own first-party capability under the
+ * {@code ae2lt} namespace ({@code com.moakiee.ae2lt.api.AE2LTCapabilities}). The two
+ * capability IDs are deliberately distinct ({@code ae2lt_api:lightning_energy}
+ * vs {@code ae2lt:lightning_energy}); see
+ * {@link com.qianchang.ae2lt_api.api.bridge.AE2LTNativeBridge} for guidance on
+ * which to query.</p>
  *
  * <h2>Example registration</h2>
  * <pre>{@code
@@ -29,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 public final class AE2LTCapabilities {
 
     /** Current API version — bump when breaking changes are introduced. */
-    public static final String API_VERSION = "1.0.2";
+    public static final String API_VERSION = "1.0.3";
 
     /**
      * Sided block capability for lightning energy I/O.
