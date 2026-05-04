@@ -5,8 +5,8 @@
 `Thunderbolt_lib` 是 [AE2-Lightning-Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech) 的 addon API 与运行时桥接库。
 
 > 运行时 `mod_id` 仍然保留为 `ae2lt_api`。
-> 对标版本：AE2 Lightning Tech 1.0.0+（已按 1.0.3 配方 Schema 对齐），Minecraft 1.21.1，NeoForge 21.1.x。
-> 最新版本:**1.0.3** —— 详见 [CHANGELOG.md](CHANGELOG.md)。
+> 对标版本：AE2 Lightning Tech 1.0.4，Minecraft 1.21.1，NeoForge 21.1.x。
+> 最新版本:**1.0.4** —— 详见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 提供的能力
 
@@ -19,6 +19,8 @@
 - 冻结 ID 常量:`AE2LTBlockEntityIds`、`AE2LTRecipeIds`(1.0.3 起新增)
 - Codec 工具:`LightningEnergyTier.CODEC` / `STREAM_CODEC`(1.0.3 起新增)
 - 原生 API 探测:`AE2LTNativeBridge`(1.0.3 起新增)
+- 版本辅助接口:`AE2LTVersion` 与 `AE2LTAPI#getLoadedAE2LTVersion()`(1.0.4 起新增)
+- `ILightningEnergyHandler` / `LightningEnergyTier` 的 AE2LT 自带 API 命名别名(1.0.4 起新增)
 
 ## 运行时桥接覆盖
 
@@ -36,9 +38,9 @@
 
 同样这五个 ID 已经以 `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS`(以及 `LIGHTNING_COLLECTOR` 等单项常量)的形式公开,用于在 addon 代码里进行迭代或匹配,不必再硬编码字符串。
 
-## 与 AE2LT 1.0.3 自带 API 的关系
+## 与 AE2LT 1.0.4 自带 API 的关系
 
-AE2LT 1.0.2 / 1.0.3 引入了自己的 first-party API 包 `com.moakiee.ae2lt.api`,使用 `ae2lt` 命名空间。两个命名空间是有意分开的:
+AE2LT 1.0.2+ 引入了自己的 first-party API 包 `com.moakiee.ae2lt.api`,使用 `ae2lt` 命名空间。AE2LT 1.0.4 没有改变该公开 API 包或 1.0.3 已核对过的配方 schema。两个命名空间是有意分开的:
 
 | | 本库(this repo) | AE2LT 自带 API |
 |--|------------------|----------------|
@@ -48,14 +50,14 @@ AE2LT 1.0.2 / 1.0.3 引入了自己的 first-party API 包 `com.moakiee.ae2lt.ap
 | 等级枚举 | `LightningEnergyTier` | `LightningTier` |
 | 配方构建器 | 有 | 无 |
 | 插件加载器 | 有 | 无 |
-| 独立可用(未装 AE2LT) | 是 | 否 |
+| 未装 AE2LT 时运行 | 否；元数据要求 AE2LT 1.0.4+ | 否 |
 
-对绝大多数 addon 来说,本库依然是更合适的选择:在没有装 AE2LT 时也可以编译 / 加载;暴露了 AE2LT 自身没有的配方构建器与插件加载器;并且在多个 Thunderbolt_lib 发布之间二进制稳定。可调用 `AE2LTNativeBridge.isNativeApiAvailable()` 在运行时探测 AE2LT 自带 API 是否存在。
+对绝大多数 addon 来说,本库依然是更合适的选择:它暴露了 AE2LT 自身没有的配方构建器、插件加载器、版本辅助接口,并且在多个 Thunderbolt_lib 发布之间尽量保持二进制稳定。可调用 `AE2LTNativeBridge.isNativeApiAvailable()` 在运行时探测 AE2LT 自带 API 是否存在；需要按版本开关兼容逻辑时可使用 `AE2LTVersion`。
 
 ## 当前命名策略
 
 - 仓库 / 项目名:`Thunderbolt_lib`
-- 构建 Jar 名:`Thunderbolt_lib-1.0.3.jar`
+- 构建 Jar 名:`Thunderbolt_lib-1.0.4.jar`
 - 运行时模组 id:`ae2lt_api`
 
 保留 `mod_id = ae2lt_api` 的原因是避免现有 addon 的 `neoforge.mods.toml` 依赖声明、Capability 查询和兼容代码直接失效。
@@ -79,14 +81,14 @@ AE2LT 1.0.2 / 1.0.3 引入了自己的 first-party API 包 `com.moakiee.ae2lt.ap
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.0,)"
+    versionRange = "[1.0.4,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.your_mod_id]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.0,)"
+    versionRange = "[1.0.4,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -98,13 +100,14 @@ AE2LT 1.0.2 / 1.0.3 引入了自己的 first-party API 包 `com.moakiee.ae2lt.ap
 ```
 
 ```text
-build/libs/Thunderbolt_lib-1.0.3.jar
+build/libs/Thunderbolt_lib-1.0.4.jar
 ```
 
 ## 版本说明
 
 本项目跟随 AE2 Lightning Tech 的发布节奏。详见 [CHANGELOG.md](CHANGELOG.md)。
 
+- `1.0.4` —— 跟进 AE2LT 1.0.4。AE2LT 的公开 API 包与配方 schema 相比 1.0.3 没有变化；本版本新增版本辅助接口、Capability ID 查询辅助、first-party 命名别名,并保留既有符号。
 - `1.0.3` —— 新增冻结 ID 常量、等级枚举的 Mojang/Stream Codec、AE2LT 自带 API 探测桥,以及 `LightningCollectedEvent` 的 `naturalWeather` 标识。对齐 AE2LT 1.0.3 的 first-party API 包。
 - `1.0.2` —— 跟进 AE2LT 1.0.2 发布版本号,内容与 1.0.1 完全一致。
 - `1.0.1` —— 按 AE2LT 1.0.2 配方 Schema 对齐 API(Crystal Catalyzer dust 模式 + tag 输出,桥接列表修正为 5 个 BE)。

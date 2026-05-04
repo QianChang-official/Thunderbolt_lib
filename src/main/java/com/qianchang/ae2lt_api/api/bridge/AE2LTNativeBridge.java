@@ -1,6 +1,7 @@
 package com.qianchang.ae2lt_api.api.bridge;
 
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Detection helpers for AE2 Lightning Tech's own first-party API package
@@ -40,6 +41,17 @@ import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 public final class AE2LTNativeBridge {
 
     private static final String NATIVE_CAPABILITIES_CLASS = "com.moakiee.ae2lt.api.AE2LTCapabilities";
+    private static final String LIGHTNING_ENERGY = "lightning_energy";
+    private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
+
+    private static final ResourceLocation NATIVE_LIGHTNING_ENERGY_BLOCK_ID =
+            ResourceLocation.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY);
+    private static final ResourceLocation NATIVE_LIGHTNING_ENERGY_ITEM_ID =
+            ResourceLocation.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY_ITEM);
+    private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_BLOCK_ID =
+            ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY);
+    private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_ITEM_ID =
+            ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY_ITEM);
 
     private static volatile Boolean cachedAvailability;
 
@@ -76,6 +88,42 @@ public final class AE2LTNativeBridge {
     /** Thunderbolt_lib's resource-location namespace ({@code "ae2lt_api"}). */
     public static String libraryNamespace() {
         return "ae2lt_api";
+    }
+
+    /**
+     * AE2LT first-party block capability id ({@code ae2lt:lightning_energy}).
+     *
+     * @since 1.0.4
+     */
+    public static ResourceLocation nativeLightningEnergyBlockId() {
+        return NATIVE_LIGHTNING_ENERGY_BLOCK_ID;
+    }
+
+    /**
+     * AE2LT first-party item capability id ({@code ae2lt:lightning_energy_item}).
+     *
+     * @since 1.0.4
+     */
+    public static ResourceLocation nativeLightningEnergyItemId() {
+        return NATIVE_LIGHTNING_ENERGY_ITEM_ID;
+    }
+
+    /**
+     * Thunderbolt_lib block capability id ({@code ae2lt_api:lightning_energy}).
+     *
+     * @since 1.0.4
+     */
+    public static ResourceLocation libraryLightningEnergyBlockId() {
+        return LIBRARY_LIGHTNING_ENERGY_BLOCK_ID;
+    }
+
+    /**
+     * Thunderbolt_lib item capability id ({@code ae2lt_api:lightning_energy_item}).
+     *
+     * @since 1.0.4
+     */
+    public static ResourceLocation libraryLightningEnergyItemId() {
+        return LIBRARY_LIGHTNING_ENERGY_ITEM_ID;
     }
 
     /**

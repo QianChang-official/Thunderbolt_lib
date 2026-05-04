@@ -25,12 +25,31 @@ public interface ILightningEnergyHandler {
     long getLightningStored(LightningEnergyTier tier);
 
     /**
+     * AE2LT first-party naming alias for {@link #getLightningStored(LightningEnergyTier)}.
+     *
+     * @since 1.0.4
+     */
+    default long getStored(LightningEnergyTier tier) {
+        return getLightningStored(tier);
+    }
+
+    /**
      * Returns the maximum amount of lightning energy that can be stored for the given tier.
      *
      * @param tier The energy tier to query.
-     * @return Maximum capacity, non-negative.
+     * @return Maximum capacity, non-negative. May be {@link Long#MAX_VALUE} for
+     *         grid-backed or otherwise unbounded handlers.
      */
     long getLightningCapacity(LightningEnergyTier tier);
+
+    /**
+     * AE2LT first-party naming alias for {@link #getLightningCapacity(LightningEnergyTier)}.
+     *
+     * @since 1.0.4
+     */
+    default long getCapacity(LightningEnergyTier tier) {
+        return getLightningCapacity(tier);
+    }
 
     /**
      * Attempts to insert lightning energy into this handler.
@@ -43,6 +62,16 @@ public interface ILightningEnergyHandler {
     long insertLightning(LightningEnergyTier tier, long amount, boolean simulate);
 
     /**
+     * AE2LT first-party naming alias for
+     * {@link #insertLightning(LightningEnergyTier, long, boolean)}.
+     *
+     * @since 1.0.4
+     */
+    default long insert(LightningEnergyTier tier, long amount, boolean simulate) {
+        return insertLightning(tier, amount, simulate);
+    }
+
+    /**
      * Attempts to extract lightning energy from this handler.
      *
      * @param tier     The energy tier to extract.
@@ -51,6 +80,16 @@ public interface ILightningEnergyHandler {
      * @return The amount that was (or would have been) extracted. Zero if the tier is not supported.
      */
     long extractLightning(LightningEnergyTier tier, long amount, boolean simulate);
+
+    /**
+     * AE2LT first-party naming alias for
+     * {@link #extractLightning(LightningEnergyTier, long, boolean)}.
+     *
+     * @since 1.0.4
+     */
+    default long extract(LightningEnergyTier tier, long amount, boolean simulate) {
+        return extractLightning(tier, amount, simulate);
+    }
 
     /**
      * Whether this handler can accept energy of the given tier.
@@ -73,9 +112,13 @@ public interface ILightningEnergyHandler {
         return getLightningStored(tier) == 0;
     }
 
-    /** Convenience: returns {@code true} if stored amount equals capacity for the given tier. */
+    /**
+     * Convenience: returns {@code true} if stored amount equals capacity for the
+     * given tier. Returns {@code false} for unbounded {@link Long#MAX_VALUE}
+     * capacity, matching AE2LT's first-party handler semantics.
+     */
     default boolean isFull(LightningEnergyTier tier) {
         long capacity = getLightningCapacity(tier);
-        return capacity > 0 && getLightningStored(tier) >= capacity;
+        return capacity > 0 && capacity != Long.MAX_VALUE && getLightningStored(tier) >= capacity;
     }
 }

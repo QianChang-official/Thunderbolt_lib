@@ -98,6 +98,15 @@ public enum LightningEnergyTier implements StringRepresentable {
     }
 
     /**
+     * AE2LT first-party naming alias for {@link #fromId(String)}.
+     *
+     * @since 1.0.4
+     */
+    public static LightningEnergyTier fromSerializedName(String serializedName) {
+        return fromId(serializedName);
+    }
+
+    /**
      * Decode a tier from a network ordinal byte. Mirrors AE2LT's own
      * {@code LightningTier.fromOrdinal} so addons can use a single ordinal wire
      * format compatible with both this library and AE2LT's first-party API.

@@ -1,6 +1,7 @@
 package com.qianchang.ae2lt_api.api;
 
 import com.qianchang.ae2lt_api.AE2LTAddonFramework;
+import com.qianchang.ae2lt_api.api.bridge.AE2LTVersion;
 import com.qianchang.ae2lt_api.api.capability.AE2LTCapabilities;
 import com.qianchang.ae2lt_api.api.lightning.ILightningEnergyHandler;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
@@ -47,6 +48,26 @@ public final class AE2LTAPI {
     /** Returns {@code true} if AE2 Lightning Tech (ae2lt) is loaded at runtime. */
     public boolean isAE2LTLoaded() {
         return ModList.get().isLoaded("ae2lt");
+    }
+
+    /** Returns this Thunderbolt_lib API version. */
+    public String getApiVersion() {
+        return AE2LTCapabilities.API_VERSION;
+    }
+
+    /** Returns the AE2LT release version this Thunderbolt_lib build was verified against. */
+    public String getTargetAE2LTVersion() {
+        return AE2LTVersion.TARGET_AE2LT_VERSION;
+    }
+
+    /** Returns the installed AE2LT mod version, if AE2LT is loaded. */
+    public Optional<String> getLoadedAE2LTVersion() {
+        return AE2LTVersion.loadedAE2LTVersion();
+    }
+
+    /** Returns whether the installed AE2LT version is at least {@code minimumVersion}. */
+    public boolean isAE2LTVersionAtLeast(String minimumVersion) {
+        return AE2LTVersion.isLoadedAE2LTAtLeast(minimumVersion);
     }
 
     /** Returns {@code true} if the given mod id is loaded at runtime. */
