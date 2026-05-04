@@ -16,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
  * Chamber, Overload Processing Factory, Tesla Coil) automatically query this
  * capability when looking for lightning energy sources or sinks adjacent to them.</p>
  *
- * <h2>Relationship to AE2LT 1.0.3's first-party API</h2>
- * <p>AE2LT 1.0.2 / 1.0.3 introduced its own first-party capability under the
+ * <h2>Relationship to AE2LT 1.0.4's first-party API</h2>
+ * <p>AE2LT 1.0.2+ exposes its own first-party capability under the
  * {@code ae2lt} namespace ({@code com.moakiee.ae2lt.api.AE2LTCapabilities}). The two
  * capability IDs are deliberately distinct ({@code ae2lt_api:lightning_energy}
  * vs {@code ae2lt:lightning_energy}); see
@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 public final class AE2LTCapabilities {
 
     /** Current API version — bump when breaking changes are introduced. */
-    public static final String API_VERSION = "1.0.3";
+    public static final String API_VERSION = "1.0.4";
 
     /**
      * Sided block capability for lightning energy I/O.

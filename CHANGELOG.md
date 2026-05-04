@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-05-04
+
+### Added
+- `com.qianchang.ae2lt_api.api.bridge.AE2LTVersion` — runtime helpers for loaded AE2LT version detection, known-compatible range checks, and dotted version comparisons.
+- `AE2LTAPI#getApiVersion()`, `getTargetAE2LTVersion()`, `getLoadedAE2LTVersion()`, and `isAE2LTVersionAtLeast(String)`.
+- Capability ID helpers on `AE2LTNativeBridge`: native/library block and item lightning-energy IDs.
+- AE2LT first-party naming aliases on `ILightningEnergyHandler`: `getStored`, `getCapacity`, `insert`, and `extract`.
+- `LightningEnergyTier.fromSerializedName(String)` alias for parity with AE2LT's first-party `LightningTier`.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.4` to track the AE2LT 1.0.4 release line.
+- Runtime metadata now requires AE2LT `1.0.4+`.
+- Project description updated to state the 1.0.4 target and exposed integration surface more directly.
+
+### Compatibility
+- AE2LT 1.0.4 does not change the first-party API package or recipe schemas compared with 1.0.3, so no recipe builders or bridge block-entity IDs changed.
+- Existing Thunderbolt_lib 1.0.3 API symbols are preserved; this release is additive apart from the tighter AE2LT runtime version requirement.
+
 ## [1.0.3] - 2026-05-03
 
 ### Added
@@ -55,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.4]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.4
 [1.0.3]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.3
 [1.0.2]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.2
 [1.0.1]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.1
