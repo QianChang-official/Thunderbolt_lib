@@ -1,6 +1,7 @@
 package com.qianchang.ae2lt_api.api;
 
 import com.qianchang.ae2lt_api.AE2LTAddonFramework;
+import com.qianchang.ae2lt_api.api.bridge.AE2LTNativeBridge;
 import com.qianchang.ae2lt_api.api.bridge.AE2LTVersion;
 import com.qianchang.ae2lt_api.api.capability.AE2LTCapabilities;
 import com.qianchang.ae2lt_api.api.lightning.ILightningEnergyHandler;
@@ -68,6 +69,17 @@ public final class AE2LTAPI {
     /** Returns whether the installed AE2LT version is at least {@code minimumVersion}. */
     public boolean isAE2LTVersionAtLeast(String minimumVersion) {
         return AE2LTVersion.isLoadedAE2LTAtLeast(minimumVersion);
+    }
+
+    /**
+     * Returns {@code true} if AE2LT's BE-level frequency-binding mechanism is
+     * available at runtime (introduced in AE2LT 1.0.5). Convenience facade over
+     * {@link AE2LTNativeBridge#isFrequencyBindingAvailable()}.
+     *
+     * @since 1.0.5
+     */
+    public boolean isAE2LTFrequencyBindingAvailable() {
+        return AE2LTNativeBridge.isFrequencyBindingAvailable();
     }
 
     /** Returns {@code true} if the given mod id is loaded at runtime. */

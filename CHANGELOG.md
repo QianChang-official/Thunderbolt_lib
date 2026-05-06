@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-05-06
+
+### Added
+- `AE2LTNativeBridge#isFrequencyBindingAvailable()` — runtime detection of AE2LT 1.0.5's BE-level frequency-binding host mechanism (`com.moakiee.ae2lt.grid.FrequencyBindingHost`). Caches the result.
+- `AE2LTNativeBridge#frequencyBindingHostClassName()` and `wirelessFrequencyManagerClassName()` constants for addons that want to introspect the binding subsystem reflectively without hardcoding class names.
+- `AE2LTVersion#FREQUENCY_BINDING_INTRODUCED_VERSION` constant (`"1.0.5"`).
+- `AE2LTVersion#isLoadedAE2LTAtLeastFrequencyBinding()` convenience version gate.
+- `AE2LTAPI#isAE2LTFrequencyBindingAvailable()` facade method.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.5` to track the AE2LT 1.0.5 release line.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.5`.
+- `AE2LTReflection`: hot-path `findMethod`/`findField` now memoize their `Method`/`Field` lookups in a `ConcurrentHashMap`, with a sentinel for misses, so repeated lightning-tick reflection no longer re-walks the class hierarchy each call.
+- `AE2LTNativeBridge`: split the cached-availability volatile into two (`cachedNativeApiAvailability`, `cachedFrequencyBindingAvailability`); collapsed the duplicate `Class.forName` boilerplate into a private `classExists` helper.
+- Project description updated to state the 1.0.5 target and call out the frequency-binding detection surface.
+
+### Compatibility
+- AE2LT 1.0.5 does not change the first-party API package (`com.moakiee.ae2lt.api`) or recipe schemas compared with 1.0.3 / 1.0.4, so no recipe builders or bridge block-entity IDs changed.
+- All existing Thunderbolt_lib 1.0.4 API symbols are preserved; this release is purely additive on the Java API surface.
+
 ## [1.0.4] - 2026-05-04
 
 ### Added
@@ -73,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.5]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.5
 [1.0.4]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.4
 [1.0.3]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.3
 [1.0.2]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.2

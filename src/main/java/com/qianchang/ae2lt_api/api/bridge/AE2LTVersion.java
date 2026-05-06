@@ -9,9 +9,13 @@ import java.util.Optional;
  * Version helpers for addon code that needs to gate AE2 Lightning Tech
  * integration behavior at runtime.
  *
- * <p>AE2LT 1.0.4 did not change the first-party API package or recipe schemas
- * compared with 1.0.3. These helpers expose that verified target explicitly
- * without pretending that new upstream interfaces exist.</p>
+ * <p>AE2LT 1.0.5 did not change the first-party API package
+ * ({@code com.moakiee.ae2lt.api}) or the recipe schemas compared with 1.0.3.
+ * Internally, however, AE2LT 1.0.5 introduced a new BE-level frequency-binding
+ * mechanism ({@code com.moakiee.ae2lt.grid.FrequencyBindingHost}). That mechanism
+ * is not part of AE2LT's frozen API and is exposed here only as a runtime
+ * detection helper so addons can light-touch around it without hard-binding to
+ * non-API symbols.</p>
  *
  * @since 1.0.4
  */
@@ -21,13 +25,21 @@ public final class AE2LTVersion {
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
     /** AE2 Lightning Tech release this Thunderbolt_lib version was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.4";
+    public static final String TARGET_AE2LT_VERSION = "1.0.5";
 
     /** First AE2LT release line that exposed the native first-party API package. */
     public static final String FIRST_PARTY_API_INTRODUCED_VERSION = "1.0.2";
 
     /** Newest AE2LT version whose native API and recipe schemas were verified. */
     public static final String FIRST_PARTY_API_LAST_VERIFIED_VERSION = TARGET_AE2LT_VERSION;
+
+    /**
+     * AE2LT release line that introduced the BE-level frequency-binding host
+     * mechanism ({@code com.moakiee.ae2lt.grid.FrequencyBindingHost}).
+     *
+     * @since 1.0.5
+     */
+    public static final String FREQUENCY_BINDING_INTRODUCED_VERSION = "1.0.5";
 
     private static final String AE2LT_MOD_ID = "ae2lt";
 
@@ -67,6 +79,21 @@ public final class AE2LTVersion {
         return loadedAE2LTVersion()
                 .map(AE2LTVersion::isKnownCompatibleAE2LTVersion)
                 .orElse(false);
+    }
+
+    /**
+     * Returns whether the loaded AE2LT version is at least
+     * {@link #FREQUENCY_BINDING_INTRODUCED_VERSION}, i.e. supports the BE-level
+     * frequency-binding host mechanism.
+     *
+     * <p>This is a version-only gate; combine with
+     * {@link AE2LTNativeBridge#isFrequencyBindingAvailable()} when you also want
+     * a classloader-level guarantee.</p>
+     *
+     * @since 1.0.5
+     */
+    public static boolean isLoadedAE2LTAtLeastFrequencyBinding() {
+        return isLoadedAE2LTAtLeast(FREQUENCY_BINDING_INTRODUCED_VERSION);
     }
 
     /**

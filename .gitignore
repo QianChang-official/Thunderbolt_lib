@@ -10,6 +10,7 @@ repo/
 .project
 .settings/
 *.launch
+.vscode/
 out/
 
 # NeoForge run directories

@@ -14,8 +14,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 final class AE2LTReflection {
 
@@ -27,13 +30,36 @@ final class AE2LTReflection {
 
     // AE2LT 1.0.2 publicly registers LIGHTNING_ENERGY_BLOCK on these five
     // grid-connected machines. Crystal Catalyzer runs on FE only, so it is
-    // intentionally excluded.
+    // intentionally excluded. AE2LT 1.0.5 left this list unchanged.
     private static final List<ResourceLocation> BRIDGED_BLOCK_ENTITY_IDS = List.of(
             ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_collector"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_simulation_room"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_assembly_chamber"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "overload_processing_factory"),
             ResourceLocation.fromNamespaceAndPath("ae2lt", "tesla_coil"));
+
+    /** Per-call-site cache for hot-path reflective method/field lookups. */
+    private static final ConcurrentMap<MethodKey, Method> METHOD_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<FieldKey, Field> FIELD_CACHE = new ConcurrentHashMap<>();
+    /** Cache marker for "method/field not found" so we don't re-walk the class hierarchy each tick. */
+    private static final Method MISSING_METHOD;
+    private static final Field MISSING_FIELD;
+
+    static {
+        try {
+            MISSING_METHOD = AE2LTReflection.class.getDeclaredMethod("missingMethodMarker");
+            MISSING_FIELD = AE2LTReflection.class.getDeclaredField("MISSING_FIELD_MARKER");
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    @SuppressWarnings("unused") // sentinel target for MISSING_FIELD
+    private static final Object MISSING_FIELD_MARKER = new Object();
+
+    @SuppressWarnings("unused") // sentinel target for MISSING_METHOD
+    private static void missingMethodMarker() {
+    }
 
     private AE2LTReflection() {
     }
@@ -190,6 +216,17 @@ final class AE2LTReflection {
     }
 
     private static Method findMethod(Class<?> type, String name, Class<?>... parameterTypes) {
+        MethodKey key = new MethodKey(type, name, parameterTypes);
+        Method cached = METHOD_CACHE.get(key);
+        if (cached != null) {
+            return cached == MISSING_METHOD ? null : cached;
+        }
+        Method found = lookupMethod(type, name, parameterTypes);
+        METHOD_CACHE.put(key, found != null ? found : MISSING_METHOD);
+        return found;
+    }
+
+    private static Method lookupMethod(Class<?> type, String name, Class<?>... parameterTypes) {
         Class<?> current = type;
         while (current != null) {
             try {
@@ -204,6 +241,17 @@ final class AE2LTReflection {
     }
 
     private static Field findField(Class<?> type, String name) {
+        FieldKey key = new FieldKey(type, name);
+        Field cached = FIELD_CACHE.get(key);
+        if (cached != null) {
+            return cached == MISSING_FIELD ? null : cached;
+        }
+        Field found = lookupField(type, name);
+        FIELD_CACHE.put(key, found != null ? found : MISSING_FIELD);
+        return found;
+    }
+
+    private static Field lookupField(Class<?> type, String name) {
         Class<?> current = type;
         while (current != null) {
             try {
@@ -215,6 +263,34 @@ final class AE2LTReflection {
             }
         }
         return null;
+    }
+
+    private record MethodKey(Class<?> owner, String name, Class<?>[] parameterTypes) {
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof MethodKey other)) return false;
+            return owner == other.owner
+                    && name.equals(other.name)
+                    && Arrays.equals(parameterTypes, other.parameterTypes);
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(owner) * 31 + name.hashCode() * 31 + Arrays.hashCode(parameterTypes);
+        }
+    }
+
+    private record FieldKey(Class<?> owner, String name) {
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FieldKey other)) return false;
+            return owner == other.owner && name.equals(other.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(owner) * 31 + name.hashCode();
+        }
     }
 
     private static Class<?> loadClass(String className) {
