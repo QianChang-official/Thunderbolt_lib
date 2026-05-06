@@ -41,6 +41,8 @@ import net.minecraft.resources.ResourceLocation;
 public final class AE2LTNativeBridge {
 
     private static final String NATIVE_CAPABILITIES_CLASS = "com.moakiee.ae2lt.api.AE2LTCapabilities";
+    private static final String FREQUENCY_BINDING_HOST_CLASS = "com.moakiee.ae2lt.grid.FrequencyBindingHost";
+    private static final String WIRELESS_FREQUENCY_MANAGER_CLASS = "com.moakiee.ae2lt.grid.WirelessFrequencyManager";
     private static final String LIGHTNING_ENERGY = "lightning_energy";
     private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
 
@@ -53,7 +55,8 @@ public final class AE2LTNativeBridge {
     private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_ITEM_ID =
             ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY_ITEM);
 
-    private static volatile Boolean cachedAvailability;
+    private static volatile Boolean cachedNativeApiAvailability;
+    private static volatile Boolean cachedFrequencyBindingAvailability;
 
     private AE2LTNativeBridge() {
     }
@@ -64,20 +67,72 @@ public final class AE2LTNativeBridge {
      *         result; classloader state cannot legitimately change after mod load.
      */
     public static boolean isNativeApiAvailable() {
-        Boolean cached = cachedAvailability;
+        Boolean cached = cachedNativeApiAvailability;
         if (cached != null) {
             return cached;
         }
-        boolean available;
-        try {
-            Class.forName(NATIVE_CAPABILITIES_CLASS, false,
-                    AE2LTNativeBridge.class.getClassLoader());
-            available = true;
-        } catch (ClassNotFoundException e) {
-            available = false;
-        }
-        cachedAvailability = available;
+        boolean available = classExists(NATIVE_CAPABILITIES_CLASS);
+        cachedNativeApiAvailability = available;
         return available;
+    }
+
+    /**
+     * Returns {@code true} if AE2LT's BE-level frequency-binding mechanism is
+     * present at runtime ({@code com.moakiee.ae2lt.grid.FrequencyBindingHost},
+     * introduced in AE2LT 1.0.5). Caches the result; classloader state cannot
+     * legitimately change after mod load.
+     *
+     * <p>This class is part of AE2LT's internal grid implementation, not its
+     * frozen first-party API. Addons should query this method only as a feature
+     * gate (e.g. before scheduling tasks that interact with frequency-bound
+     * machines), and must not reflect into the host class beyond that.</p>
+     *
+     * @since 1.0.5
+     */
+    public static boolean isFrequencyBindingAvailable() {
+        Boolean cached = cachedFrequencyBindingAvailability;
+        if (cached != null) {
+            return cached;
+        }
+        boolean available = classExists(FREQUENCY_BINDING_HOST_CLASS);
+        cachedFrequencyBindingAvailability = available;
+        return available;
+    }
+
+    /**
+     * Fully-qualified internal class name of AE2LT's frequency-binding host
+     * interface, exposed as a constant so addons that want to call into it via
+     * reflection do not have to hardcode the class name themselves.
+     *
+     * <p>The class lives in {@code com.moakiee.ae2lt.grid}, which is internal
+     * implementation; treat the symbol name as best-effort, not part of the
+     * frozen API contract.</p>
+     *
+     * @since 1.0.5
+     */
+    public static String frequencyBindingHostClassName() {
+        return FREQUENCY_BINDING_HOST_CLASS;
+    }
+
+    /**
+     * Fully-qualified internal class name of AE2LT's wireless frequency manager,
+     * which owns the per-frequency transmitter registry that frequency-binding
+     * hosts subscribe to. Exposed for the same reason as
+     * {@link #frequencyBindingHostClassName()}.
+     *
+     * @since 1.0.5
+     */
+    public static String wirelessFrequencyManagerClassName() {
+        return WIRELESS_FREQUENCY_MANAGER_CLASS;
+    }
+
+    private static boolean classExists(String fqcn) {
+        try {
+            Class.forName(fqcn, false, AE2LTNativeBridge.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     /** AE2LT's own resource-location namespace ({@code "ae2lt"}). */
