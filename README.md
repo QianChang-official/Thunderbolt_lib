@@ -5,8 +5,8 @@
 `Thunderbolt_lib` is the addon API and runtime bridge library for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech).
 
 > Runtime mod id remains `ae2lt_api`.
-> Target versions: AE2 Lightning Tech 1.0.4, Minecraft 1.21.1, NeoForge 21.1.x.
-> Latest release: **1.0.4** — see [CHANGELOG.md](CHANGELOG.md).
+> Target versions: AE2 Lightning Tech 1.0.5, Minecraft 1.21.1, NeoForge 21.1.x.
+> Latest release: **1.0.5** — see [CHANGELOG.md](CHANGELOG.md).
 
 ## What It Provides
 
@@ -21,6 +21,7 @@
 - Native API detection: `AE2LTNativeBridge` (since 1.0.3)
 - Version helpers: `AE2LTVersion` and `AE2LTAPI#getLoadedAE2LTVersion()` (since 1.0.4)
 - First-party naming aliases on `ILightningEnergyHandler` and `LightningEnergyTier` (since 1.0.4)
+- Frequency-binding detection: `AE2LTNativeBridge#isFrequencyBindingAvailable()` and `AE2LTAPI#isAE2LTFrequencyBindingAvailable()` (since 1.0.5)
 
 ## Runtime Bridge Coverage
 
@@ -38,9 +39,9 @@
 
 The same five IDs are exposed as `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS` (and individually as `LIGHTNING_COLLECTOR`, etc.) for addon code that wants to iterate or query without hardcoding strings.
 
-## Relationship to AE2LT 1.0.4's First-Party API
+## Relationship to AE2LT 1.0.5's First-Party API
 
-AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. AE2LT 1.0.4 does not change that public package or the recipe schemas checked in 1.0.3. The two namespaces are deliberately distinct:
+AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. AE2LT 1.0.5 does not change that public package or the recipe schemas checked in 1.0.3 / 1.0.4. Internally, AE2LT 1.0.5 added a BE-level frequency-binding mechanism (`com.moakiee.ae2lt.grid.FrequencyBindingHost`); that class is part of AE2LT's internal grid implementation, not its frozen API. Thunderbolt_lib 1.0.5 exposes a runtime detection helper (`AE2LTNativeBridge#isFrequencyBindingAvailable()`) so addons can light-touch around the feature without hard-binding to non-API symbols. The two namespaces remain deliberately distinct:
 
 | | Library (this repo) | AE2LT first-party |
 |--|---------------------|-------------------|
@@ -50,14 +51,14 @@ AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` 
 | Tier enum | `LightningEnergyTier` | `LightningTier` |
 | Recipe builders | yes | no |
 | Plugin loader | yes | no |
-| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.4+ | no |
+| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.5+ | no |
 
 For most addons, the library remains the right choice: it exposes recipe builders, plugin loading, version helpers, and a byte-stable API surface across Thunderbolt_lib releases. Use `AE2LTNativeBridge.isNativeApiAvailable()` to detect whether AE2LT's first-party API is loaded at runtime, and `AE2LTVersion` when you need version gates.
 
 ## Runtime Naming
 
 - Git repository / project name: `Thunderbolt_lib`
-- Built jar name: `Thunderbolt_lib-1.0.4.jar`
+- Built jar name: `Thunderbolt_lib-1.0.5.jar`
 - Runtime mod id: `ae2lt_api`
 
 Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarations in `neoforge.mods.toml` and capability lookups.
@@ -81,14 +82,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.4,)"
+    versionRange = "[1.0.5,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.your_mod_id]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.4,)"
+    versionRange = "[1.0.5,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -100,13 +101,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 ```
 
 ```text
-build/libs/Thunderbolt_lib-1.0.4.jar
+build/libs/Thunderbolt_lib-1.0.5.jar
 ```
 
 ## Versioning
 
 This project tracks AE2 Lightning Tech's release line. See [CHANGELOG.md](CHANGELOG.md) for per-version notes.
 
+- `1.0.5` — tracks AE2LT 1.0.5. AE2LT's public API package and recipe schemas are unchanged from 1.0.4; this release adds frequency-binding detection helpers and caches hot-path reflective lookups while preserving existing symbols.
 - `1.0.4` — tracks AE2LT 1.0.4. AE2LT's public API package and recipe schemas are unchanged from 1.0.3; this release adds version helpers, capability-id helpers, and first-party naming aliases while preserving existing symbols.
 - `1.0.3` — adds frozen ID constants, Mojang/Stream codecs on the tier enum, native-API detection bridge, and a `naturalWeather` flag on `LightningCollectedEvent`. Aligns with AE2LT 1.0.3's first-party API package.
 - `1.0.2` — bumps version to track AE2LT 1.0.2 release line; content identical to 1.0.1.
