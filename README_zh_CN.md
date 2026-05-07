@@ -2,121 +2,76 @@
 
 [English](README.md)
 
-`Thunderbolt_lib` 是 [AE2-Lightning-Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech) 的 addon API 与运行时桥接库。
+Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库，为希望与 AE2LT 闪电能量网络互操作的下游模组提供稳定、最小、且长期保持向后兼容的开发者接入面。
 
-> 运行时 `mod_id` 仍然保留为 `ae2lt_api`。
-> 对标版本：AE2 Lightning Tech 1.0.5，Minecraft 1.21.1，NeoForge 21.1.x。
-> 最新版本:**1.0.5** —— 详见 [CHANGELOG.md](CHANGELOG.md)。
+本前置库本身不注册任何方块、物品或配方，也不向 AE2LT 内部资源注入新内容。它仅暴露编写"AE2LT 拓展模组"所需的接口、能力、事件、配方构建器与桥接工具，使生态中的其它模组能够按公共契约接入闪电能量系统，而无需依赖 AE2LT 主模组的内部实现细节。
 
-## 提供的能力
+运行时 mod_id 为 `ae2lt_api`，与 AE2LT 主模组（`ae2lt`）刻意保持不同命名空间，便于在 `mods.toml` 中分别声明依赖，也便于在出现命名冲突或迁移时由 API 一侧承接桥接职责。
 
-- 闪电能量 Capability API:`ILightningEnergyHandler`
-- AE2LT 闪电联网机器的运行时桥接(共 5 个并网方块实体,见下方)
-- 避雷收电拦截事件:`LightningCollectedEvent`(1.0.3 起新增 `isNaturalWeather()`)
-- 当前 AE2LT 机器与仪式配方的构建器
-- `@AE2LTPlugin`、`IAE2LTPlugin`、`ServiceLoader` 插件加载
-- 静态辅助门面:`AE2LTAPI`
-- 冻结 ID 常量:`AE2LTBlockEntityIds`、`AE2LTRecipeIds`(1.0.3 起新增)
-- Codec 工具:`LightningEnergyTier.CODEC` / `STREAM_CODEC`(1.0.3 起新增)
-- 原生 API 探测:`AE2LTNativeBridge`(1.0.3 起新增)
-- 版本辅助接口:`AE2LTVersion` 与 `AE2LTAPI#getLoadedAE2LTVersion()`(1.0.4 起新增)
-- `ILightningEnergyHandler` / `LightningEnergyTier` 的 AE2LT 自带 API 命名别名(1.0.4 起新增)
-- 频率绑定运行时探测:`AE2LTNativeBridge#isFrequencyBindingAvailable()` 与 `AE2LTAPI#isAE2LTFrequencyBindingAvailable()`(1.0.5 起新增)
+适用于 Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
 
-## 运行时桥接覆盖
+## 功能
 
-`AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK` 桥接的是 AE2LT 1.0.2+ 公开暴露的 5 个并网机器:
+### 能力接口
 
-| 方块实体 id | 角色 |
-|------------|------|
-| `ae2lt:lightning_collector` | 收集自然 / 人造闪电 |
-| `ae2lt:lightning_simulation_room` | 模拟雷击,用于配方制造 |
-| `ae2lt:lightning_assembly_chamber` | 闪电 + 物品输入合成 |
-| `ae2lt:overload_processing_factory` | 高负载闪电处理 |
-| `ae2lt:tesla_coil` | 闪电能量释放 |
+通过 NeoForge 能力系统暴露一组方块/物品能力（`AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK` 与 `AE2LTCapabilities.LIGHTNING_ENERGY_ITEM`）。下游模组在自己的 BlockEntity 或 Item 上实现 `ILightningEnergyHandler` 接口并完成注册，即可参与闪电能量网络。
 
-`ae2lt:crystal_catalyzer` 仅使用 FE,不属于闪电能量桥接范围,故有意排除。
+该接口提供 `getLightningStored`、`getLightningCapacity`、`insertLightning`、`extractLightning`、`canInsert`、`canExtract` 等读写原语，并附带 `isEmpty`、`isFull` 等便捷判断。所有能量量级 `long` 表示，可承载从单台机器到全网格规模的计量需求。
 
-同样这五个 ID 已经以 `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS`(以及 `LIGHTNING_COLLECTOR` 等单项常量)的形式公开,用于在 addon 代码里进行迭代或匹配,不必再硬编码字符串。
+### 能量等级
 
-## 与 AE2LT 1.0.5 自带 API 的关系
+`LightningEnergyTier` 定义了高压（`HIGH_VOLTAGE`）与超高压（`EXTREME_HIGH_VOLTAGE`）两档，并提供 Mojang Codec 与 StreamCodec 实例，用于在 NBT、网络包以及配方 JSON 中安全地序列化与反序列化能量等级，避免下游模组手写枚举字面量带来的拼写漂移与跨端不一致。
 
-AE2LT 1.0.2+ 引入了自己的 first-party API 包 `com.moakiee.ae2lt.api`,使用 `ae2lt` 命名空间。AE2LT 1.0.5 没有改变该公开 API 包或 1.0.3 / 1.0.4 已核对过的配方 schema;1.0.5 在内部新增了 BE 级频率绑定机制(`com.moakiee.ae2lt.grid.FrequencyBindingHost`),但该类属于 AE2LT 内部网络实现,不在自带 API 的冻结契约里。Thunderbolt_lib 1.0.5 提供了运行时探测辅助(`AE2LTNativeBridge#isFrequencyBindingAvailable()`),供 addon 在不硬绑定非 API 符号的前提下进行特性开关。两个命名空间仍然有意分开:
+### 运行时桥接
 
-| | 本库(this repo) | AE2LT 自带 API |
-|--|------------------|----------------|
-| Java 包 | `com.qianchang.ae2lt_api.api.*` | `com.moakiee.ae2lt.api.*` |
-| 命名空间 | `ae2lt_api` | `ae2lt` |
-| Capability id | `ae2lt_api:lightning_energy` | `ae2lt:lightning_energy` |
-| 等级枚举 | `LightningEnergyTier` | `LightningTier` |
-| 配方构建器 | 有 | 无 |
-| 插件加载器 | 有 | 无 |
-| 未装 AE2LT 时运行 | 否；元数据要求 AE2LT 1.0.5+ | 否 |
+`AE2LTNativeBridge` 是一组运行时探测工具，下游模组可在加载早期通过它判断当前是否真的有 AE2LT 主模组在运行，并以 `ResourceLocation` 的形式安全引用主模组中的方块实体类型与配方类型。这一层的存在使"AE2LT 不在场也能优雅降级"的可选依赖模式成为可能，避免硬依赖与 `ClassNotFoundException`。
 
-对绝大多数 addon 来说,本库依然是更合适的选择:它暴露了 AE2LT 自身没有的配方构建器、插件加载器、版本辅助接口,并且在多个 Thunderbolt_lib 发布之间尽量保持二进制稳定。可调用 `AE2LTNativeBridge.isNativeApiAvailable()` 在运行时探测 AE2LT 自带 API 是否存在；需要按版本开关兼容逻辑时可使用 `AE2LTVersion`。
+### 配方构建器
 
-## 当前命名策略
+`LightningAssemblyRecipeBuilder` 提供链式 API（`create`、`input`、`inputTag`、`result`、`totalEnergy`、`lightningCost`、`lightningTier`、`toJson`），用于在数据生成阶段为闪电组装腔产出符合主模组 schema 的配方 JSON。
 
-- 仓库 / 项目名:`Thunderbolt_lib`
-- 构建 Jar 名:`Thunderbolt_lib-1.0.5.jar`
-- 运行时模组 id:`ae2lt_api`
+每个配方最多支持 9 个输入栈，输入既可指向具体物品也可指向物品标签，结果项与所需总 FE 能量、单次闪电消耗量、所需电压等级均可显式配置。
 
-保留 `mod_id = ae2lt_api` 的原因是避免现有 addon 的 `neoforge.mods.toml` 依赖声明、Capability 查询和兼容代码直接失效。
+### 事件总线
 
-## 当前配方覆盖
+`LightningCollectedEvent` 在闪电能量被收集时由主模组在 NeoForge 事件总线上派发。事件可被取消，并暴露收集器位置、收集到的能量量级、所属世界以及当前是否处于自然天气状态等上下文，便于下游模组在风暴、机械模拟、玩家挑战等场景下做条件性介入。
 
-| 构建器 | 配方类型 | 备注 |
-|--------|---------|------|
-| `LightningAssemblyRecipeBuilder` | `ae2lt:lightning_assembly` | 多输入 + 闪电等级 + 总能量 |
-| `LightningTransformRecipeBuilder` | `ae2lt:lightning_transform` | 简单输入 → 结果 |
-| `LightningSimulationRecipeBuilder` | `ae2lt:lightning_simulation` | 多输入 + 闪电等级 + 总能量 |
-| `OverloadProcessingRecipeBuilder` | `ae2lt:overload_processing` | 物品 + 可选输入流体 + 多结果 |
-| `CrystalCatalyzerRecipeBuilder` | `ae2lt:crystal_catalyzer` | 催化槽,物品或 tag 输出,支持 `dust` 模式 |
-| `LightningStrikeRecipeBuilder` | `ae2lt:lightning_strike` | 多方块仪式,由闪电触发 |
+### ID 常量
 
-`CrystalCatalyzerRecipeBuilder` 已对齐 AE2LT 1.0.2 的 `crystal_catalyzer/dust/*.json` 文件:调用 `dustMode()`(或 `mode("dust")`)再配合 `outputTag(tagId, count)` 即可输出 tag 解析后的物品堆。
+`AE2LTBlockEntityIds` 与 `AE2LTRecipeIds` 集中收录了主模组对外暴露的方块实体类型 ID 与配方类型 ID，作为 `ResourceLocation` 常量提供，避免下游模组手写字面量造成的拼写漂移，并使主模组未来重命名内部资源时可由本前置库统一修补。
 
-## 依赖示例
+### 插件加载
+
+通过 `IAE2LTPlugin` 接口与 `@AE2LTPlugin` 注解，下游模组可以以"插件"身份在主模组初始化的固定时机被回调，统一接入注册流程，而无需自行监听 NeoForge 生命周期事件或推算正确的 ordering 关系。
+
+### 静态门面
+
+`AE2LTAPI` 作为整个 API 的静态访问入口，集中暴露 API 版本号、主要能力句柄与桥接工具，便于在自家代码中以 `import static` 方式快速引用，也便于在 IDE 中通过单一入口浏览整个公共面。
+
+## 拓展模组依赖声明
+
+下游拓展模组应在 `META-INF/neoforge.mods.toml` 中以 `ae2lt_api` 与 `ae2lt` 两个独立 modId 分别声明依赖。前者保证开发期与运行期能够找到本前置库并使用其公共类型；后者用于声明对 AE2LT 主模组的运行期可选/必需依赖。示例：
 
 ```toml
-[[dependencies.your_mod_id]]
+[[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.5,)"
+    versionRange = "[1.0.0,)"
     ordering = "AFTER"
     side = "BOTH"
 
-[[dependencies.your_mod_id]]
+[[dependencies.yourmodid]]
     modId = "ae2lt"
-    type = "required"
-    versionRange = "[1.0.5,)"
+    type = "optional"
+    versionRange = "[1.0.0,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
 
-## 构建产物
+`versionRange` 中的下限请按下游模组实际兼容的最低 API 版本填写。
 
-```bash
-./gradlew build
-```
+## 许可证
 
-```text
-build/libs/Thunderbolt_lib-1.0.5.jar
-```
+本项目使用多许可证结构：
 
-## 版本说明
-
-本项目跟随 AE2 Lightning Tech 的发布节奏。详见 [CHANGELOG.md](CHANGELOG.md)。
-
-- `1.0.5` —— 跟进 AE2LT 1.0.5。AE2LT 的公开 API 包与配方 schema 相比 1.0.4 没有变化；本版本新增频率绑定运行时探测辅助、为反射热路径增加方法/字段缓存,并保留既有符号。
-- `1.0.4` —— 跟进 AE2LT 1.0.4。AE2LT 的公开 API 包与配方 schema 相比 1.0.3 没有变化；本版本新增版本辅助接口、Capability ID 查询辅助、first-party 命名别名,并保留既有符号。
-- `1.0.3` —— 新增冻结 ID 常量、等级枚举的 Mojang/Stream Codec、AE2LT 自带 API 探测桥,以及 `LightningCollectedEvent` 的 `naturalWeather` 标识。对齐 AE2LT 1.0.3 的 first-party API 包。
-- `1.0.2` —— 跟进 AE2LT 1.0.2 发布版本号,内容与 1.0.1 完全一致。
-- `1.0.1` —— 按 AE2LT 1.0.2 配方 Schema 对齐 API(Crystal Catalyzer dust 模式 + tag 输出,桥接列表修正为 5 个 BE)。
-- `1.0.0` —— Thunderbolt_lib 初次发布,对齐 AE2LT 1.0.0。
-
-## 免责声明
-
-本名称仅用于非商业社区用途。如名称被任何权利人认为涉嫌侵权或不适宜继续使用,请联系维护者,收到通知后会第一时间更名或修改。
-
-完整说明见:[DISCLAIMER.md](DISCLAIMER.md)
+- **代码**：MIT License
