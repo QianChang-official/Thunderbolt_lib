@@ -4,16 +4,19 @@ import com.qianchang.ae2lt_api.AE2LTAddonFramework;
 import com.qianchang.ae2lt_api.api.bridge.AE2LTNativeBridge;
 import com.qianchang.ae2lt_api.api.bridge.AE2LTVersion;
 import com.qianchang.ae2lt_api.api.capability.AE2LTCapabilities;
+import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding;
 import com.qianchang.ae2lt_api.api.lightning.ILightningEnergyHandler;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * Main static entry point for the AE2 Lightning Tech Addon Framework API.
@@ -80,6 +83,73 @@ public final class AE2LTAPI {
      */
     public boolean isAE2LTFrequencyBindingAvailable() {
         return AE2LTNativeBridge.isFrequencyBindingAvailable();
+    }
+
+    /**
+     * Returns whether the given block entity implements AE2LT's internal
+     * receiver-side frequency-binding host contract.
+     *
+     * @since 1.0.6
+     */
+    public boolean isAE2LTFrequencyBindingHost(BlockEntity blockEntity) {
+        return AE2LTFrequencyBinding.isHost(blockEntity);
+    }
+
+    /**
+     * Reads an AE2LT frequency-binding host's frequency id.
+     *
+     * @since 1.0.6
+     */
+    public OptionalInt getAE2LTFrequencyId(BlockEntity blockEntity) {
+        return AE2LTFrequencyBinding.getFrequencyId(blockEntity);
+    }
+
+    /**
+     * Sets an AE2LT frequency-binding host's frequency id.
+     *
+     * @since 1.0.6
+     */
+    public boolean setAE2LTFrequency(BlockEntity blockEntity, int frequencyId) {
+        return AE2LTFrequencyBinding.setFrequency(blockEntity, frequencyId);
+    }
+
+    /**
+     * Clears an AE2LT frequency-binding host's frequency.
+     *
+     * @since 1.0.6
+     */
+    public boolean clearAE2LTFrequency(BlockEntity blockEntity) {
+        return AE2LTFrequencyBinding.clearFrequency(blockEntity);
+    }
+
+    /**
+     * Returns whether an AE2LT frequency-binding host currently has a live
+     * virtual grid connection.
+     *
+     * @since 1.0.6
+     */
+    public boolean isAE2LTFrequencyConnected(BlockEntity blockEntity) {
+        return AE2LTFrequencyBinding.isConnected(blockEntity);
+    }
+
+    /**
+     * Returns the used channel count reported by an AE2LT frequency-binding
+     * host, if available.
+     *
+     * @since 1.0.6
+     */
+    public OptionalInt getAE2LTFrequencyGridUsedChannels(BlockEntity blockEntity) {
+        return AE2LTFrequencyBinding.getGridUsedChannels(blockEntity);
+    }
+
+    /**
+     * Returns the maximum channel count reported by an AE2LT frequency-binding
+     * host. AE2LT reports {@code -1} for infinite channel mode.
+     *
+     * @since 1.0.6
+     */
+    public OptionalInt getAE2LTFrequencyGridMaxChannels(BlockEntity blockEntity) {
+        return AE2LTFrequencyBinding.getGridMaxChannels(blockEntity);
     }
 
     /** Returns {@code true} if the given mod id is loaded at runtime. */

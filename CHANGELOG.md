@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-05-11
+
+### Added
+- `com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding` — reflective helper facade for AE2LT's internal `FrequencyBindingHost` contract.
+- `AE2LTFrequencyBinding#isHost(BlockEntity)`, `getFrequencyId(BlockEntity)`, `setFrequency(BlockEntity, int)`, `clearFrequency(BlockEntity)`, `isConnected(BlockEntity)`, `getGridUsedChannels(BlockEntity)`, and `getGridMaxChannels(BlockEntity)`.
+- `AE2LTFrequencyBinding` constants for AE2LT's internal host/helper class names and frequency NBT tag keys (`FrequencyId`, `Frequency`).
+- `AE2LTAPI` facade methods for the new frequency-binding host helpers.
+- `AE2LTNativeBridge#frequencyBindingHelperClassName()`.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.6` to track the AE2LT 1.0.6 release line.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.6`.
+- README files now document the 1.0.6 target and the frequency-binding host helper surface.
+
+### Compatibility
+- AE2LT 1.0.6 keeps the first-party API package (`com.moakiee.ae2lt.api`) and recipe schemas compatible with 1.0.5.
+- The new frequency-binding helpers are deliberately reflective and fail closed when AE2LT is absent or the block entity is not a frequency-binding host.
+- All existing Thunderbolt_lib 1.0.5 API symbols are preserved; this release is additive.
+
 ## [1.0.5] - 2026-05-06
 
 ### Added
@@ -93,6 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.6]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.6
 [1.0.5]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.5
 [1.0.4]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.4
 [1.0.3]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.3
