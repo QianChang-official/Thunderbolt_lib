@@ -1,6 +1,7 @@
 package com.qianchang.ae2lt_api.api.bridge;
 
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
+import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -41,7 +42,8 @@ import net.minecraft.resources.ResourceLocation;
 public final class AE2LTNativeBridge {
 
     private static final String NATIVE_CAPABILITIES_CLASS = "com.moakiee.ae2lt.api.AE2LTCapabilities";
-    private static final String FREQUENCY_BINDING_HOST_CLASS = "com.moakiee.ae2lt.grid.FrequencyBindingHost";
+    private static final String FREQUENCY_BINDING_HOST_CLASS = AE2LTFrequencyBinding.HOST_CLASS_NAME;
+    private static final String FREQUENCY_BINDING_HELPER_CLASS = AE2LTFrequencyBinding.HELPER_CLASS_NAME;
     private static final String WIRELESS_FREQUENCY_MANAGER_CLASS = "com.moakiee.ae2lt.grid.WirelessFrequencyManager";
     private static final String LIGHTNING_ENERGY = "lightning_energy";
     private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
@@ -112,6 +114,18 @@ public final class AE2LTNativeBridge {
      */
     public static String frequencyBindingHostClassName() {
         return FREQUENCY_BINDING_HOST_CLASS;
+    }
+
+    /**
+     * Fully-qualified internal class name of AE2LT's shared frequency-binding
+     * helper. Its public static NBT tag constants are mirrored by
+     * {@link AE2LTFrequencyBinding#TAG_FREQUENCY_ID} and
+     * {@link AE2LTFrequencyBinding#TAG_MEMORY_FREQUENCY}.
+     *
+     * @since 1.0.6
+     */
+    public static String frequencyBindingHelperClassName() {
+        return FREQUENCY_BINDING_HELPER_CLASS;
     }
 
     /**
