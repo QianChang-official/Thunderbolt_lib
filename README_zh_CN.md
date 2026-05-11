@@ -8,7 +8,7 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 运行时 mod_id 为 `ae2lt_api`，与 AE2LT 主模组（`ae2lt`）刻意保持不同命名空间，便于在 `mods.toml` 中分别声明依赖，也便于在出现命名冲突或迁移时由 API 一侧承接桥接职责。
 
-适用于 Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
+适用于 AE2 Lightning Tech 1.0.6 / Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
 
 ## 功能
 
@@ -25,6 +25,10 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 ### 运行时桥接
 
 `AE2LTNativeBridge` 是一组运行时探测工具，下游模组可在加载早期通过它判断当前是否真的有 AE2LT 主模组在运行，并以 `ResourceLocation` 的形式安全引用主模组中的方块实体类型与配方类型。这一层的存在使"AE2LT 不在场也能优雅降级"的可选依赖模式成为可能，避免硬依赖与 `ClassNotFoundException`。
+
+### 频率绑定桥接
+
+`AE2LTFrequencyBinding` 为 AE2LT 1.0.6 扩展后的频率绑定主机提供反射式辅助接口，可在不直接依赖 `com.moakiee.ae2lt.grid.FrequencyBindingHost` 内部类型的前提下，判断某个 BlockEntity 是否支持频率绑定、读取/设置/清除频率 ID、查询连接状态与频道统计。`AE2LTAPI` 也提供了对应门面方法，便于下游模组从单一入口调用。
 
 ### 配方构建器
 
@@ -56,14 +60,14 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.0,)"
+    versionRange = "[1.0.6,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "optional"
-    versionRange = "[1.0.0,)"
+    versionRange = "[1.0.6,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
