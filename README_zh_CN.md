@@ -8,7 +8,7 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 运行时 mod_id 为 `ae2lt_api`，与 AE2LT 主模组（`ae2lt`）刻意保持不同命名空间，便于在 `mods.toml` 中分别声明依赖，也便于在出现命名冲突或迁移时由 API 一侧承接桥接职责。
 
-适用于 AE2 Lightning Tech 1.0.6 / Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
+适用于 AE2 Lightning Tech 1.0.7 / Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
 
 ## 功能
 
@@ -28,7 +28,7 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 ### 频率绑定桥接
 
-`AE2LTFrequencyBinding` 为 AE2LT 1.0.6 扩展后的频率绑定主机提供反射式辅助接口，可在不直接依赖 `com.moakiee.ae2lt.grid.FrequencyBindingHost` 内部类型的前提下，判断某个 BlockEntity 是否支持频率绑定、读取/设置/清除频率 ID、查询连接状态与频道统计。`AE2LTAPI` 也提供了对应门面方法，便于下游模组从单一入口调用。
+`AE2LTFrequencyBinding` 延续为 AE2LT 1.0.7 目标线上的频率绑定主机提供反射式辅助接口，可在不直接依赖 `com.moakiee.ae2lt.grid.FrequencyBindingHost` 内部类型的前提下，判断某个 BlockEntity 是否支持频率绑定、读取/设置/清除频率 ID、查询连接状态与频道统计。`AE2LTAPI` 也提供了对应门面方法，便于下游模组从单一入口调用。
 
 ### 配方构建器
 
@@ -38,7 +38,9 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 ### 事件总线
 
-`LightningCollectedEvent` 在闪电能量被收集时由主模组在 NeoForge 事件总线上派发。事件可被取消，并暴露收集器位置、收集到的能量量级、所属世界以及当前是否处于自然天气状态等上下文，便于下游模组在风暴、机械模拟、玩家挑战等场景下做条件性介入。
+`LightningCollectedEvent` 现在是对 AE2LT 主模组公开 `com.moakiee.ae2lt.api.event.LightningCollectedEvent` 的镜像事件，而不是由 Thunderbolt_lib 自己接管闪电实体 tick 后单独派发。下游模组仍可在 NeoForge 事件总线上取消该事件或改写当前生效 tier 的能量数量；这些改动会被同步回 AE2LT 的公开事件，再由 AE2LT 原生 collector 流程继续执行，因此自然闪电副作用、培养和 ritual 兼容性都保留在主模组自己的捕获路径里。
+
+如果这个兼容镜像因为 AE2LT 公开事件契约缺失或漂移而无法初始化，Thunderbolt_lib 会失败封闭：库侧 `LightningCollectedEvent` 不再派发，但反射式 capability bridge、配方构建器以及插件/bootstrap 公共面仍然可用。另一方面，本项目在运行时元数据里仍把 AE2LT 声明为必需依赖，所以“只装 Thunderbolt_lib 不装 AE2LT”并不是受支持的玩家安装形态。
 
 ### ID 常量
 
@@ -60,14 +62,14 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.6,)"
+    versionRange = "[1.0.7,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "optional"
-    versionRange = "[1.0.6,)"
+    versionRange = "[1.0.7,)"
     ordering = "AFTER"
     side = "BOTH"
 ```

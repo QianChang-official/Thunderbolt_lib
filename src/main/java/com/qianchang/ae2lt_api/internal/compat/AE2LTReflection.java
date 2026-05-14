@@ -84,27 +84,75 @@ final class AE2LTReflection {
         return blockEntity.getClass().getName().equals(LIGHTNING_COLLECTOR_CLASS);
     }
 
-    static Object getRuntimeTier(LightningEnergyTier tier) {
-        Class<?> tierClass = loadClass(LIGHTNING_TIER_CLASS);
-        if (tierClass == null) {
+    static <T> Class<? extends T> loadSubclass(String className, Class<T> expectedType, String context) {
+        Class<?> rawClass = loadClass(className);
+        if (rawClass == null) {
             return null;
         }
-        String name = tier == LightningEnergyTier.EXTREME_HIGH_VOLTAGE
-                ? "EXTREME_HIGH_VOLTAGE"
-                : "HIGH_VOLTAGE";
-        @SuppressWarnings("unchecked")
-        Object enumValue = Enum.valueOf((Class<Enum>) tierClass.asSubclass(Enum.class), name);
-        return enumValue;
+        try {
+            return rawClass.asSubclass(expectedType);
+        } catch (ClassCastException e) {
+            AE2LTAddonFramework.LOGGER.error(
+                    "[AE2LT API] {} expected {} to extend {}, but found an incompatible runtime type.",
+                    context,
+                    className,
+                    expectedType.getName(),
+                    e);
+            return null;
+        }
+    }
+
+    static void requireMethod(Class<?> type, String name, Class<?>... parameterTypes) {
+        resolveRequiredMethod(type, name, parameterTypes);
+    }
+
+    static Method resolveRequiredMethod(Class<?> type, String name, Class<?>... parameterTypes) {
+        if (findMethod(type, name, parameterTypes) != null) {
+            return findMethod(type, name, parameterTypes);
+        }
+        String signature = type.getName() + "#" + name + Arrays.toString(parameterTypes);
+        AE2LTAddonFramework.LOGGER.error(
+                "[AE2LT API] Required compatibility method is missing: {}",
+                signature);
+        throw new IllegalStateException("Required compatibility method is missing: " + signature);
+    }
+
+    static Object getRuntimeTier(LightningEnergyTier tier) {
+        try {
+            Class<?> tierClass = loadClass(LIGHTNING_TIER_CLASS);
+            if (tierClass == null) {
+                return null;
+            }
+            String name = tier == LightningEnergyTier.EXTREME_HIGH_VOLTAGE
+                    ? "EXTREME_HIGH_VOLTAGE"
+                    : "HIGH_VOLTAGE";
+            @SuppressWarnings("unchecked")
+            Object enumValue = Enum.valueOf((Class<Enum>) tierClass.asSubclass(Enum.class), name);
+            return enumValue;
+        } catch (RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.error(
+                    "[AE2LT API] Failed to resolve AE2LT lightning tier constant for {}.",
+                    tier,
+                    e);
+            throw new IllegalStateException("Failed to resolve AE2LT lightning tier constant for " + tier, e);
+        }
     }
 
     static Object invoke(Object target, String name, Class<?>[] parameterTypes, Object... args) {
         try {
+            Objects.requireNonNull(target, "target");
             Method method = findMethod(target.getClass(), name, parameterTypes);
             if (method == null) {
                 return null;
             }
             return method.invoke(target, args);
-        } catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.error(
+                    "[AE2LT API] Reflective invoke failed: {}#{}{}",
+                    target == null ? "<null>" : target.getClass().getName(),
+                    name,
+                    Arrays.toString(parameterTypes),
+                    e);
             throw new IllegalStateException("Failed to invoke method " + name + " on " + target.getClass().getName(), e);
         }
     }
@@ -121,7 +169,12 @@ final class AE2LTReflection {
                 throw new NoSuchFieldException(fieldName);
             }
             field.set(target, value);
-        } catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.error(
+                    "[AE2LT API] Reflective field write failed: {}#{}",
+                    target == null ? "<null>" : target.getClass().getName(),
+                    fieldName,
+                    e);
             throw new IllegalStateException("Failed to set field " + fieldName + " on " + target.getClass().getName(), e);
         }
     }
@@ -131,7 +184,8 @@ final class AE2LTReflection {
             Class<?> configClass = Objects.requireNonNull(loadClass(COMMON_CONFIG_CLASS));
             Method method = configClass.getMethod("lightningCollectorCooldownTicks");
             return (Integer) method.invoke(null);
-        } catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.error("[AE2LT API] Failed to query AE2LT lightning collector cooldown.", e);
             throw new IllegalStateException("Failed to query AE2LT lightning collector cooldown", e);
         }
     }
@@ -146,7 +200,8 @@ final class AE2LTReflection {
                     boolean.class);
             method.setAccessible(true);
             method.invoke(null, level, lightningPos, naturalWeather);
-        } catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.error("[AE2LT API] Failed to invoke AE2LT lightning rod transform hook.", e);
             throw new IllegalStateException("Failed to invoke AE2LT lightning rod transform hook", e);
         }
     }
@@ -188,7 +243,11 @@ final class AE2LTReflection {
             Class<?> keyClass = Objects.requireNonNull(loadClass(LIGHTNING_KEY_CLASS));
             Field field = keyClass.getField(fieldName);
             return field.get(null);
-        } catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.error(
+                    "[AE2LT API] Failed to resolve AE2LT lightning key {}.",
+                    fieldName,
+                    e);
             throw new IllegalStateException("Failed to resolve AE2LT lightning key " + fieldName, e);
         }
     }
@@ -295,9 +354,12 @@ final class AE2LTReflection {
 
     private static Class<?> loadClass(String className) {
         try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Optional AE2LT runtime class missing: {}", className);
+            return Class.forName(className, false, AE2LTReflection.class.getClassLoader());
+        } catch (ClassNotFoundException | LinkageError e) {
+            AE2LTAddonFramework.LOGGER.debug(
+                    "[AE2LT API] Optional AE2LT runtime class missing or failed to link: {}",
+                    className,
+                    e);
             return null;
         }
     }

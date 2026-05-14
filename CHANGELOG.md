@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.0.7] - 2026-05-14
+
+### Fixed
+- `AE2LTLightningCollectorEventBridge` no longer intercepts lightning entity ticks ahead of AE2LT. It now mirrors AE2LT's public `com.moakiee.ae2lt.api.event.LightningCollectedEvent`, keeping cancellation and amount rewrites inside AE2LT's native collector capture path.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.7` to track the AE2LT 1.0.7 release line.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.7`.
+- `LightningCollectedEvent` documentation and README text now describe the event as a mirror of AE2LT's public collector event, including the rule that only the active tier is synchronized back to AE2LT.
+- AE2LT compatibility bridge initialization now caches the native event `Method` handles up front and logs the exact degradation scope when library-side collector-event mirroring is disabled.
+
+### Validation
+- Release validation scope for this line: GameTest integration verification, client startup compatibility, and bridge-focused log scanning.
+- Verified scenarios covered natural EHV storage, artificial HV storage, natural-strike crystal cultivation / lightning-rod side effects, and a natural-only lightning ritual path.
+
+### Compatibility
+- Bridge-focused server/client log scans found no reappearance of AE2LT's natural-lightning interception warning and no `AE2LT compatibility bridge failed to initialize` messages.
+- The surrounding AE2LT dev environment still emits unrelated loot / recipe parse errors for missing `mekanism_extras`, `extendedae`, `neoecoae`, and `minecraft:nether_quartz` recipe inputs; those remain outside the scope of this library release.
+
 ## [1.0.6] - 2026-05-11
 
 ### Added
@@ -112,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
 [1.0.6]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.6
 [1.0.5]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.5
 [1.0.4]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.4

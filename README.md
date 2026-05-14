@@ -5,14 +5,14 @@
 `Thunderbolt_lib` is the addon API and runtime bridge library for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech).
 
 > Runtime mod id remains `ae2lt_api`.
-> Target versions: AE2 Lightning Tech 1.0.6, Minecraft 1.21.1, NeoForge 21.1.x.
-> Latest release: **1.0.6** — see [CHANGELOG.md](CHANGELOG.md).
+> Target versions: AE2 Lightning Tech 1.0.7, Minecraft 1.21.1, NeoForge 21.1.x.
+> Latest release: **1.0.7** — see [CHANGELOG.md](CHANGELOG.md).
 
 ## What It Provides
 
 - Lightning energy capability API: `ILightningEnergyHandler`
 - Runtime bridge for AE2LT lightning-connected machines (5 grid-connected block entities; see below)
-- Collector interception event: `LightningCollectedEvent` (with `isNaturalWeather()` since 1.0.3)
+- Collector capture mirror event: `LightningCollectedEvent` (with `isNaturalWeather()` since 1.0.3)
 - Recipe builders for current AE2LT machine and ritual recipe ids
 - Plugin loading via `@AE2LTPlugin`, `IAE2LTPlugin`, and `ServiceLoader`
 - Static helper facade: `AE2LTAPI`
@@ -40,9 +40,9 @@
 
 The same five IDs are exposed as `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS` (and individually as `LIGHTNING_COLLECTOR`, etc.) for addon code that wants to iterate or query without hardcoding strings.
 
-## Relationship to AE2LT 1.0.6's First-Party API
+## Relationship to AE2LT 1.0.7's First-Party API
 
-AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. AE2LT 1.0.6 does not change that public package or the recipe schemas checked in 1.0.3 / 1.0.4. Internally, AE2LT 1.0.6 expands the BE-level frequency-binding mechanism (`com.moakiee.ae2lt.grid.FrequencyBindingHost`) from wireless devices to more AE2LT machines. That class is part of AE2LT's internal grid implementation, not its frozen API. Thunderbolt_lib 1.0.6 exposes runtime detection plus a reflective helper facade (`AE2LTFrequencyBinding`) so addons can light-touch around the feature without hard-binding to non-API symbols. The two namespaces remain deliberately distinct:
+AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. Thunderbolt_lib 1.0.7 targets the AE2LT 1.0.7 line, keeps the existing namespace split and reflective frequency-binding helpers from 1.0.6, and updates the collector compatibility path to mirror AE2LT's public `LightningCollectedEvent` instead of intercepting lightning entity ticks. The two namespaces remain deliberately distinct:
 
 | | Library (this repo) | AE2LT first-party |
 |--|---------------------|-------------------|
@@ -52,14 +52,18 @@ AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` 
 | Tier enum | `LightningEnergyTier` | `LightningTier` |
 | Recipe builders | yes | no |
 | Plugin loader | yes | no |
-| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.6+ | no |
+| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.7+ | no |
 
 For most addons, the library remains the right choice: it exposes recipe builders, plugin loading, version helpers, and a byte-stable API surface across Thunderbolt_lib releases. Use `AE2LTNativeBridge.isNativeApiAvailable()` to detect whether AE2LT's first-party API is loaded at runtime, and `AE2LTVersion` when you need version gates.
+
+`LightningCollectedEvent` now mirrors AE2LT's own public collector event instead of taking over lightning-entity ticks. Library listeners still receive a cancellable event with HV/EHV convenience accessors, and any cancellation or active-tier amount rewrite is synchronized back onto AE2LT's public event before the collector inserts into the grid.
+
+If that compatibility mirror cannot initialize because AE2LT's public event contract is missing or has drifted, Thunderbolt_lib now fails closed: the library-side `LightningCollectedEvent` will stop firing, but the reflective block-entity capability bridge, recipe builders, and plugin/bootstrap surface remain available. This project still declares AE2LT as a required runtime dependency, so "Thunderbolt_lib without AE2LT" is not a supported player install state.
 
 ## Runtime Naming
 
 - Git repository / project name: `Thunderbolt_lib`
-- Built jar name: `Thunderbolt_lib-1.0.6.jar`
+- Built jar name: `Thunderbolt_lib-1.0.7.jar`
 - Runtime mod id: `ae2lt_api`
 
 Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarations in `neoforge.mods.toml` and capability lookups.
@@ -83,14 +87,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.6,)"
+    versionRange = "[1.0.7,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.your_mod_id]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.6,)"
+    versionRange = "[1.0.7,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -102,13 +106,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 ```
 
 ```text
-build/libs/Thunderbolt_lib-1.0.6.jar
+build/libs/Thunderbolt_lib-1.0.7.jar
 ```
 
 ## Versioning
 
 This project tracks AE2 Lightning Tech's release line. See [CHANGELOG.md](CHANGELOG.md) for per-version notes.
 
+- `1.0.7` — tracks AE2LT 1.0.7 and ships the collector-event compatibility hotfix: Thunderbolt_lib now mirrors AE2LT's public `LightningCollectedEvent`, keeps cancellation/amount rewrites inside AE2LT's native collector flow, and records runtime verification scope as GameTest integration validation + client startup compatibility + log scanning.
 - `1.0.6` — tracks AE2LT 1.0.6. AE2LT's public API package and recipe schemas are unchanged, while its frequency-binding subsystem now applies to more machines; this release adds reflective frequency host helpers while preserving existing symbols.
 - `1.0.5` — tracks AE2LT 1.0.5. AE2LT's public API package and recipe schemas are unchanged from 1.0.4; this release adds frequency-binding detection helpers and caches hot-path reflective lookups while preserving existing symbols.
 - `1.0.4` — tracks AE2LT 1.0.4. AE2LT's public API package and recipe schemas are unchanged from 1.0.3; this release adds version helpers, capability-id helpers, and first-party naming aliases while preserving existing symbols.

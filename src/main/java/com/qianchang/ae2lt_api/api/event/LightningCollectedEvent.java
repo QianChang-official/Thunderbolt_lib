@@ -7,12 +7,14 @@ import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 
 /**
- * Fired on the NeoForge EVENT_BUS when the AE2LT Lightning Collector (or any
- * compatible collector registered through the framework) captures a lightning strike.
+ * Fired on the NeoForge EVENT_BUS when Thunderbolt_lib mirrors AE2LT's public
+ * collector capture event for addon consumers that target the library namespace.
  *
  * <p>This event is cancellable. Cancelling it prevents the energy from being
- * added to the collector's storage. Use this to apply custom rules about
- * which strikes should be collected, or to redirect energy elsewhere.</p>
+ * added to the collector's storage by synchronizing the cancellation back onto
+ * AE2LT's own {@code com.moakiee.ae2lt.api.event.LightningCollectedEvent}. Use
+ * this to apply custom rules about which strikes should be collected, or to
+ * redirect energy elsewhere.</p>
  *
  * <p>Subscribe with:</p>
  * <pre>{@code
@@ -24,12 +26,20 @@ import net.neoforged.bus.api.ICancellableEvent;
  *
  * <h2>Relationship to AE2LT 1.0.3's first-party event</h2>
  * <p>AE2LT 1.0.3 introduced its own {@code com.moakiee.ae2lt.api.event.LightningCollectedEvent}.
- * The two events are <em>not</em> the same Java type and fire from different
- * code paths: the library event continues to fire from the Thunderbolt_lib
- * collector bridge, while AE2LT's first-party event fires from AE2LT's own
- * {@code captureLightning}. Subscribing to both is safe and idempotent. The
- * {@link #isNaturalWeather()} flag (added in 1.0.3) mirrors the same flag on
- * AE2LT's first-party event for parity.</p>
+ * The two events are <em>not</em> the same Java type, but the library event now
+ * mirrors the first-party event instead of running a separate collector-takeover
+ * path. Thunderbolt_lib listens to AE2LT's public event, translates its single
+ * tier/amount payload into this library's HV/EHV view, then writes cancellation
+ * and amount edits back to the AE2LT event before the collector inserts into the
+ * grid. The inactive tier always stays at {@code 0}; only the active tier is
+ * synchronized back to AE2LT. The mirror listener is registered at
+ * {@code EventPriority.LOWEST}: AE2LT reads cancellation and amount only after
+ * its internal {@code EventBus.post(...)} call returns, so this late mirror still
+ * runs before insertion into the grid. If another listener cancels AE2LT's
+ * first-party event before Thunderbolt_lib receives it, this library event will
+ * not fire.
+ * The {@link #isNaturalWeather()} flag mirrors the same flag on AE2LT's
+ * first-party event for parity.</p>
  */
 public class LightningCollectedEvent extends Event implements ICancellableEvent {
 

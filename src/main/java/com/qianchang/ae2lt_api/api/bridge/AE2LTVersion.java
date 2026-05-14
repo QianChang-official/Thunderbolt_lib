@@ -9,11 +9,11 @@ import java.util.Optional;
  * Version helpers for addon code that needs to gate AE2 Lightning Tech
  * integration behavior at runtime.
  *
- * <p>AE2LT 1.0.6 did not change the first-party API package
- * ({@code com.moakiee.ae2lt.api}) or the recipe schemas compared with 1.0.3.
- * AE2LT 1.0.6 expands the frequency-binding subsystem across more machines;
- * that subsystem is still internal, so Thunderbolt_lib exposes only reflective
- * helper methods that avoid hard-linking to non-API symbols.</p>
+ * <p>AE2LT 1.0.7 remains on the same first-party API package
+ * ({@code com.moakiee.ae2lt.api}) used by the previous checked release lines.
+ * Thunderbolt_lib 1.0.7 keeps the reflective frequency-binding helpers added on
+ * the 1.0.6 line and updates the collector compatibility path to mirror AE2LT's
+ * public collector event instead of intercepting lightning entity ticks.</p>
  *
  * @since 1.0.4
  */
@@ -23,7 +23,7 @@ public final class AE2LTVersion {
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
     /** AE2 Lightning Tech release this Thunderbolt_lib version was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.6";
+    public static final String TARGET_AE2LT_VERSION = "1.0.7";
 
     /** First AE2LT release line that exposed the native first-party API package. */
     public static final String FIRST_PARTY_API_INTRODUCED_VERSION = "1.0.2";
