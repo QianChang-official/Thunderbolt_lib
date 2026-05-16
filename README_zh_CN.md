@@ -8,7 +8,7 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 运行时 mod_id 为 `ae2lt_api`，与 AE2LT 主模组（`ae2lt`）刻意保持不同命名空间，便于在 `mods.toml` 中分别声明依赖，也便于在出现命名冲突或迁移时由 API 一侧承接桥接职责。
 
-适用于 AE2 Lightning Tech 1.0.7 / Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
+适用于 AE2 Lightning Tech 1.0.8 / Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
 
 ## 功能
 
@@ -28,7 +28,9 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 ### 频率绑定桥接
 
-`AE2LTFrequencyBinding` 延续为 AE2LT 1.0.7 目标线上的频率绑定主机提供反射式辅助接口，可在不直接依赖 `com.moakiee.ae2lt.grid.FrequencyBindingHost` 内部类型的前提下，判断某个 BlockEntity 是否支持频率绑定、读取/设置/清除频率 ID、查询连接状态与频道统计。`AE2LTAPI` 也提供了对应门面方法，便于下游模组从单一入口调用。
+`AE2LTFrequencyBinding` 继续为 AE2LT 内部频率绑定主机提供反射式辅助接口，可在不直接依赖 `com.moakiee.ae2lt.grid.FrequencyBindingHost` 内部类型的前提下，判断某个 BlockEntity 是否支持频率绑定、读取/设置/清除频率 ID、查询连接状态与频道统计。
+
+1.0.8 起，AE2LT 主模组公开了 `com.moakiee.ae2lt.api.frequency.FrequencyApi`。Thunderbolt_lib 新增 `AE2LTFrequencyApi`、`AE2LTFrequencyInfo`、`AE2LTTransmitterInfo` 与 `AE2LTFrequencySecurity`，为下游模组提供不硬链接 AE2LT 类型的只读查询：绑定频率 ID、频率元数据、发射端维度/坐标，以及频率是否仍有效。`AE2LTAPI` 也提供了对应门面方法，便于从单一入口调用。
 
 ### 配方构建器
 
@@ -62,14 +64,14 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.7,)"
+    versionRange = "[1.0.8,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "optional"
-    versionRange = "[1.0.7,)"
+    versionRange = "[1.0.8,)"
     ordering = "AFTER"
     side = "BOTH"
 ```

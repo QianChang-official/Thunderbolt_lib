@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-05-16
+
+### Added
+- `com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyApi` — reflective read-only bridge for AE2LT 1.0.8's public `com.moakiee.ae2lt.api.frequency.FrequencyApi`.
+- `AE2LTFrequencyApi#getBoundFrequencyId(BlockEntity)`, `getFrequencyInfo(MinecraftServer, int)`, `getTransmitter(MinecraftServer, int)`, and `isValidFrequency(MinecraftServer, int)`.
+- Immutable library-side snapshots `AE2LTFrequencyInfo` and `AE2LTTransmitterInfo`, plus `AE2LTFrequencySecurity`.
+- `AE2LTNativeBridge#isFrequencyApiAvailable()`, `frequencyApiClassName()`, `publicFrequencyBindingHostClassName()`, `publicFrequencyBindingAccessClassName()`, and `publicFrequencyBindingMenuHostClassName()`.
+- `AE2LTAPI` facade methods for the new public frequency query bridge.
+- `AE2LTVersion#PUBLIC_FREQUENCY_API_INTRODUCED_VERSION` and `isLoadedAE2LTAtLeastPublicFrequencyApi()`.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.8` to track the AE2LT 1.0.8 release line.
+- Runtime metadata now requires AE2LT `1.0.8+`.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.8`.
+- README files now document AE2LT 1.0.8's public wireless frequency API bridge and the new runtime dependency floor.
+
+### Compatibility
+- AE2LT 1.0.8 keeps the first-party lightning capability, collector event, and recipe schema contracts compatible with 1.0.7.
+- The public frequency API bridge is deliberately reflective and fails closed when AE2LT is absent, older than 1.0.8, not initialized yet, or if the frequency contract drifts.
+- Mutation and UI entry points from AE2LT's public frequency package are exposed as class-name constants only; addons implementing third-party wireless receivers should compile directly against AE2LT's first-party API jar.
+
 ## [1.0.7] - 2026-05-14
 
 ### Fixed
@@ -134,6 +155,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
+[1.0.8]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.8
 [1.0.6]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.6
 [1.0.5]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.5
 [1.0.4]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.4
