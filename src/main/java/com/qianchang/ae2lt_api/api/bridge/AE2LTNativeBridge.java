@@ -1,7 +1,8 @@
 package com.qianchang.ae2lt_api.api.bridge;
 
-import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding;
+import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyApi;
+import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -42,8 +43,14 @@ import net.minecraft.resources.ResourceLocation;
 public final class AE2LTNativeBridge {
 
     private static final String NATIVE_CAPABILITIES_CLASS = "com.moakiee.ae2lt.api.AE2LTCapabilities";
+    private static final String PUBLIC_FREQUENCY_API_CLASS = AE2LTFrequencyApi.FREQUENCY_API_CLASS_NAME;
     private static final String FREQUENCY_BINDING_HOST_CLASS = AE2LTFrequencyBinding.HOST_CLASS_NAME;
     private static final String FREQUENCY_BINDING_HELPER_CLASS = AE2LTFrequencyBinding.HELPER_CLASS_NAME;
+    private static final String PUBLIC_FREQUENCY_BINDING_HOST_CLASS = AE2LTFrequencyApi.FREQUENCY_BINDING_HOST_CLASS_NAME;
+    private static final String PUBLIC_FREQUENCY_BINDING_ACCESS_CLASS =
+            AE2LTFrequencyApi.FREQUENCY_BINDING_ACCESS_CLASS_NAME;
+    private static final String PUBLIC_FREQUENCY_BINDING_MENU_HOST_CLASS =
+            AE2LTFrequencyApi.FREQUENCY_BINDING_MENU_HOST_CLASS_NAME;
     private static final String WIRELESS_FREQUENCY_MANAGER_CLASS = "com.moakiee.ae2lt.grid.WirelessFrequencyManager";
     private static final String LIGHTNING_ENERGY = "lightning_energy";
     private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
@@ -59,6 +66,7 @@ public final class AE2LTNativeBridge {
 
     private static volatile Boolean cachedNativeApiAvailability;
     private static volatile Boolean cachedFrequencyBindingAvailability;
+    private static volatile Boolean cachedFrequencyApiAvailability;
 
     private AE2LTNativeBridge() {
     }
@@ -102,6 +110,33 @@ public final class AE2LTNativeBridge {
     }
 
     /**
+     * Returns {@code true} if AE2LT 1.0.8's public wireless frequency API is
+     * present at runtime
+     * ({@code com.moakiee.ae2lt.api.frequency.FrequencyApi}). Caches the
+     * result; classloader state cannot legitimately change after mod load.
+     *
+     * @since 1.0.8
+     */
+    public static boolean isFrequencyApiAvailable() {
+        Boolean cached = cachedFrequencyApiAvailability;
+        if (cached != null) {
+            return cached;
+        }
+        boolean available = classExists(PUBLIC_FREQUENCY_API_CLASS);
+        cachedFrequencyApiAvailability = available;
+        return available;
+    }
+
+    /**
+     * Fully-qualified class name of AE2LT's public frequency API entry point.
+     *
+     * @since 1.0.8
+     */
+    public static String frequencyApiClassName() {
+        return PUBLIC_FREQUENCY_API_CLASS;
+    }
+
+    /**
      * Fully-qualified internal class name of AE2LT's frequency-binding host
      * interface, exposed as a constant so addons that want to call into it via
      * reflection do not have to hardcode the class name themselves.
@@ -126,6 +161,37 @@ public final class AE2LTNativeBridge {
      */
     public static String frequencyBindingHelperClassName() {
         return FREQUENCY_BINDING_HELPER_CLASS;
+    }
+
+    /**
+     * Fully-qualified class name of AE2LT 1.0.8's public receiver binding host
+     * interface. Prefer the reflective query helpers in
+     * {@link AE2LTFrequencyApi} unless your addon intentionally compiles
+     * against AE2LT's first-party API jar.
+     *
+     * @since 1.0.8
+     */
+    public static String publicFrequencyBindingHostClassName() {
+        return PUBLIC_FREQUENCY_BINDING_HOST_CLASS;
+    }
+
+    /**
+     * Fully-qualified class name of AE2LT 1.0.8's public receiver binding
+     * access handle.
+     *
+     * @since 1.0.8
+     */
+    public static String publicFrequencyBindingAccessClassName() {
+        return PUBLIC_FREQUENCY_BINDING_ACCESS_CLASS;
+    }
+
+    /**
+     * Fully-qualified class name of AE2LT 1.0.8's public frequency menu marker.
+     *
+     * @since 1.0.8
+     */
+    public static String publicFrequencyBindingMenuHostClassName() {
+        return PUBLIC_FREQUENCY_BINDING_MENU_HOST_CLASS;
     }
 
     /**

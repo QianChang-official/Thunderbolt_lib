@@ -9,11 +9,9 @@ import java.util.Optional;
  * Version helpers for addon code that needs to gate AE2 Lightning Tech
  * integration behavior at runtime.
  *
- * <p>AE2LT 1.0.7 remains on the same first-party API package
- * ({@code com.moakiee.ae2lt.api}) used by the previous checked release lines.
- * Thunderbolt_lib 1.0.7 keeps the reflective frequency-binding helpers added on
- * the 1.0.6 line and updates the collector compatibility path to mirror AE2LT's
- * public collector event instead of intercepting lightning entity ticks.</p>
+ * <p>AE2LT 1.0.8 keeps the first-party lightning capability/event contracts
+ * used by the previous checked release lines and adds a public wireless
+ * frequency API under {@code com.moakiee.ae2lt.api.frequency}.</p>
  *
  * @since 1.0.4
  */
@@ -23,7 +21,7 @@ public final class AE2LTVersion {
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
     /** AE2 Lightning Tech release this Thunderbolt_lib version was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.7";
+    public static final String TARGET_AE2LT_VERSION = "1.0.8";
 
     /** First AE2LT release line that exposed the native first-party API package. */
     public static final String FIRST_PARTY_API_INTRODUCED_VERSION = "1.0.2";
@@ -38,6 +36,9 @@ public final class AE2LTVersion {
      * @since 1.0.5
      */
     public static final String FREQUENCY_BINDING_INTRODUCED_VERSION = "1.0.5";
+
+    /** AE2LT release line that introduced the public wireless frequency API. */
+    public static final String PUBLIC_FREQUENCY_API_INTRODUCED_VERSION = "1.0.8";
 
     private static final String AE2LT_MOD_ID = "ae2lt";
 
@@ -92,6 +93,16 @@ public final class AE2LTVersion {
      */
     public static boolean isLoadedAE2LTAtLeastFrequencyBinding() {
         return isLoadedAE2LTAtLeast(FREQUENCY_BINDING_INTRODUCED_VERSION);
+    }
+
+    /**
+     * Returns whether the loaded AE2LT version is at least
+     * {@link #PUBLIC_FREQUENCY_API_INTRODUCED_VERSION}.
+     *
+     * @since 1.0.8
+     */
+    public static boolean isLoadedAE2LTAtLeastPublicFrequencyApi() {
+        return isLoadedAE2LTAtLeast(PUBLIC_FREQUENCY_API_INTRODUCED_VERSION);
     }
 
     /**

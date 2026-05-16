@@ -5,10 +5,14 @@ import com.qianchang.ae2lt_api.api.bridge.AE2LTNativeBridge;
 import com.qianchang.ae2lt_api.api.bridge.AE2LTVersion;
 import com.qianchang.ae2lt_api.api.capability.AE2LTCapabilities;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding;
+import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyApi;
+import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyInfo;
+import com.qianchang.ae2lt_api.api.frequency.AE2LTTransmitterInfo;
 import com.qianchang.ae2lt_api.api.lightning.ILightningEnergyHandler;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -83,6 +87,55 @@ public final class AE2LTAPI {
      */
     public boolean isAE2LTFrequencyBindingAvailable() {
         return AE2LTNativeBridge.isFrequencyBindingAvailable();
+    }
+
+    /**
+     * Returns {@code true} if AE2LT 1.0.8's public wireless frequency API is
+     * available at runtime.
+     *
+     * @since 1.0.8
+     */
+    public boolean isAE2LTPublicFrequencyApiAvailable() {
+        return AE2LTNativeBridge.isFrequencyApiAvailable();
+    }
+
+    /**
+     * Reads a frequency id through AE2LT 1.0.8's public frequency API.
+     *
+     * <p>Unlike {@link #getAE2LTFrequencyId(BlockEntity)}, this also covers
+     * public transmitter-side providers when AE2LT exposes them.</p>
+     *
+     * @since 1.0.8
+     */
+    public OptionalInt getAE2LTPublicBoundFrequencyId(BlockEntity blockEntity) {
+        return AE2LTFrequencyApi.getBoundFrequencyId(blockEntity);
+    }
+
+    /**
+     * Looks up AE2LT 1.0.8 public frequency metadata by id.
+     *
+     * @since 1.0.8
+     */
+    public Optional<AE2LTFrequencyInfo> getAE2LTFrequencyInfo(MinecraftServer server, int frequencyId) {
+        return AE2LTFrequencyApi.getFrequencyInfo(server, frequencyId);
+    }
+
+    /**
+     * Looks up the AE2LT wireless transmitter registered for a frequency id.
+     *
+     * @since 1.0.8
+     */
+    public Optional<AE2LTTransmitterInfo> getAE2LTTransmitter(MinecraftServer server, int frequencyId) {
+        return AE2LTFrequencyApi.getTransmitter(server, frequencyId);
+    }
+
+    /**
+     * Returns whether AE2LT currently has a registered frequency with this id.
+     *
+     * @since 1.0.8
+     */
+    public boolean isAE2LTValidFrequency(MinecraftServer server, int frequencyId) {
+        return AE2LTFrequencyApi.isValidFrequency(server, frequencyId);
     }
 
     /**
