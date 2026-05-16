@@ -34,6 +34,6 @@ ${mod_description}
 [[dependencies.${mod_id}]]
     modId="ae2lt"
     type="required"
-    versionRange="[1.0.7,)"
+    versionRange="[1.0.8,)"
     ordering="AFTER"
     side="BOTH"

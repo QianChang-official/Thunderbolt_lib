@@ -5,8 +5,8 @@
 `Thunderbolt_lib` is the addon API and runtime bridge library for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech).
 
 > Runtime mod id remains `ae2lt_api`.
-> Target versions: AE2 Lightning Tech 1.0.7, Minecraft 1.21.1, NeoForge 21.1.x.
-> Latest release: **1.0.7** — see [CHANGELOG.md](CHANGELOG.md).
+> Target versions: AE2 Lightning Tech 1.0.8, Minecraft 1.21.1, NeoForge 21.1.x.
+> Latest release: **1.0.8** — see [CHANGELOG.md](CHANGELOG.md).
 
 ## What It Provides
 
@@ -23,6 +23,7 @@
 - First-party naming aliases on `ILightningEnergyHandler` and `LightningEnergyTier` (since 1.0.4)
 - Frequency-binding detection: `AE2LTNativeBridge#isFrequencyBindingAvailable()` and `AE2LTAPI#isAE2LTFrequencyBindingAvailable()` (since 1.0.5)
 - Frequency-binding host helpers: `AE2LTFrequencyBinding` plus `AE2LTAPI` facade methods for reading/writing host frequency ids, connection state, and grid channel counts (since 1.0.6)
+- AE2LT 1.0.8 public frequency API query bridge: `AE2LTFrequencyApi`, `AE2LTFrequencyInfo`, `AE2LTTransmitterInfo`, `AE2LTFrequencySecurity`, plus `AE2LTAPI` facade methods for bound-frequency, metadata, transmitter, and validity queries (since 1.0.8)
 
 ## Runtime Bridge Coverage
 
@@ -40,9 +41,9 @@
 
 The same five IDs are exposed as `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS` (and individually as `LIGHTNING_COLLECTOR`, etc.) for addon code that wants to iterate or query without hardcoding strings.
 
-## Relationship to AE2LT 1.0.7's First-Party API
+## Relationship to AE2LT 1.0.8's First-Party API
 
-AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. Thunderbolt_lib 1.0.7 targets the AE2LT 1.0.7 line, keeps the existing namespace split and reflective frequency-binding helpers from 1.0.6, and updates the collector compatibility path to mirror AE2LT's public `LightningCollectedEvent` instead of intercepting lightning entity ticks. The two namespaces remain deliberately distinct:
+AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. Thunderbolt_lib 1.0.8 targets the AE2LT 1.0.8 line, keeps the existing namespace split, keeps the collector compatibility mirror from 1.0.7, and adds a reflective read-only bridge for AE2LT's public wireless frequency API. The two namespaces remain deliberately distinct:
 
 | | Library (this repo) | AE2LT first-party |
 |--|---------------------|-------------------|
@@ -52,18 +53,20 @@ AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` 
 | Tier enum | `LightningEnergyTier` | `LightningTier` |
 | Recipe builders | yes | no |
 | Plugin loader | yes | no |
-| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.7+ | no |
+| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.8+ | no |
 
 For most addons, the library remains the right choice: it exposes recipe builders, plugin loading, version helpers, and a byte-stable API surface across Thunderbolt_lib releases. Use `AE2LTNativeBridge.isNativeApiAvailable()` to detect whether AE2LT's first-party API is loaded at runtime, and `AE2LTVersion` when you need version gates.
 
 `LightningCollectedEvent` now mirrors AE2LT's own public collector event instead of taking over lightning-entity ticks. Library listeners still receive a cancellable event with HV/EHV convenience accessors, and any cancellation or active-tier amount rewrite is synchronized back onto AE2LT's public event before the collector inserts into the grid.
+
+AE2LT 1.0.8 adds `com.moakiee.ae2lt.api.frequency.FrequencyApi`. Thunderbolt_lib mirrors its read-only query surface through `AE2LTFrequencyApi` without putting AE2LT classes in public method signatures. Addons can query bound frequency ids, frequency metadata, transmitter locations, and current validity through the static helper or the `AE2LTAPI` facade. The mutation and UI entry points remain intentionally exposed as class-name constants only; addons that implement third-party wireless receivers should compile directly against AE2LT's first-party API for that integration.
 
 If that compatibility mirror cannot initialize because AE2LT's public event contract is missing or has drifted, Thunderbolt_lib now fails closed: the library-side `LightningCollectedEvent` will stop firing, but the reflective block-entity capability bridge, recipe builders, and plugin/bootstrap surface remain available. This project still declares AE2LT as a required runtime dependency, so "Thunderbolt_lib without AE2LT" is not a supported player install state.
 
 ## Runtime Naming
 
 - Git repository / project name: `Thunderbolt_lib`
-- Built jar name: `Thunderbolt_lib-1.0.7.jar`
+- Built jar name: `Thunderbolt_lib-1.0.8.jar`
 - Runtime mod id: `ae2lt_api`
 
 Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarations in `neoforge.mods.toml` and capability lookups.
@@ -87,14 +90,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.7,)"
+    versionRange = "[1.0.8,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.your_mod_id]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.7,)"
+    versionRange = "[1.0.8,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -106,13 +109,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 ```
 
 ```text
-build/libs/Thunderbolt_lib-1.0.7.jar
+build/libs/Thunderbolt_lib-1.0.8.jar
 ```
 
 ## Versioning
 
 This project tracks AE2 Lightning Tech's release line. See [CHANGELOG.md](CHANGELOG.md) for per-version notes.
 
+- `1.0.8` — tracks AE2LT 1.0.8 and adds a reflective bridge for the new public wireless frequency API: bound-frequency id lookup, frequency metadata snapshots, transmitter location snapshots, validity checks, and class-name constants for the public binding/UI contracts.
 - `1.0.7` — tracks AE2LT 1.0.7 and ships the collector-event compatibility hotfix: Thunderbolt_lib now mirrors AE2LT's public `LightningCollectedEvent`, keeps cancellation/amount rewrites inside AE2LT's native collector flow, and records runtime verification scope as GameTest integration validation + client startup compatibility + log scanning.
 - `1.0.6` — tracks AE2LT 1.0.6. AE2LT's public API package and recipe schemas are unchanged, while its frequency-binding subsystem now applies to more machines; this release adds reflective frequency host helpers while preserving existing symbols.
 - `1.0.5` — tracks AE2LT 1.0.5. AE2LT's public API package and recipe schemas are unchanged from 1.0.4; this release adds frequency-binding detection helpers and caches hot-path reflective lookups while preserving existing symbols.

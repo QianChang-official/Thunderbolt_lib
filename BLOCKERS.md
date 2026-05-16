@@ -2,6 +2,29 @@
 
 This file tracks release-gate items that must survive across sessions.
 
+## 1.0.8 Release Gate
+
+Status: build validation passed; release unblocked for the API alignment scope.
+
+This line tracks the AE2LT 1.0.8 public wireless frequency API. Thunderbolt_lib
+does not hard-link AE2LT's new frequency classes; the new helper surface is
+reflective and read-only.
+
+### Required Before 1.0.8 Version Bump
+
+- [x] Compare AE2LT main after `1.0.8` and identify public API changes.
+- [x] Add a Thunderbolt_lib-side bridge for the new public frequency query surface.
+- [x] Keep mutation/UI frequency contracts out of Thunderbolt_lib public signatures unless hard-linking becomes necessary.
+- [x] Bump `mod_version`, `AE2LTCapabilities.API_VERSION`, `AE2LTVersion`, README target-version text, runtime metadata, and changelog entries to `1.0.8`.
+- [x] Run `compileJava`.
+- [x] Run full `build`.
+
+### Validation Notes
+
+- Validation scope: static source comparison against AE2LT `origin/main` after `1.0.8`, `compileJava`, and full Gradle `build`.
+- The AE2LT public frequency API files are unchanged between the `1.0.8` commit and current `origin/main`.
+- Runtime GameTest verification was not repeated for this release because the library change is an additive reflective query bridge; no collector-flow or capability-registration code changed.
+
 ## 1.0.7 Release Gate
 
 Status: 运行时验证已通过; 1.0.7 release unblocked.
