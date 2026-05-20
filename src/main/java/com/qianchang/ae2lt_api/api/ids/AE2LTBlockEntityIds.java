@@ -1,6 +1,6 @@
 package com.qianchang.ae2lt_api.api.ids;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
@@ -26,23 +26,23 @@ public final class AE2LTBlockEntityIds {
     /** Mod id of AE2 Lightning Tech itself. Frozen as part of the API contract. */
     public static final String MOD_ID = "ae2lt";
 
-    public static final ResourceLocation LIGHTNING_COLLECTOR =
-            ResourceLocation.fromNamespaceAndPath(MOD_ID, "lightning_collector");
+    public static final Identifier LIGHTNING_COLLECTOR =
+            Identifier.fromNamespaceAndPath(MOD_ID, "lightning_collector");
 
-    public static final ResourceLocation LIGHTNING_SIMULATION_ROOM =
-            ResourceLocation.fromNamespaceAndPath(MOD_ID, "lightning_simulation_room");
+    public static final Identifier LIGHTNING_SIMULATION_ROOM =
+            Identifier.fromNamespaceAndPath(MOD_ID, "lightning_simulation_room");
 
-    public static final ResourceLocation LIGHTNING_ASSEMBLY_CHAMBER =
-            ResourceLocation.fromNamespaceAndPath(MOD_ID, "lightning_assembly_chamber");
+    public static final Identifier LIGHTNING_ASSEMBLY_CHAMBER =
+            Identifier.fromNamespaceAndPath(MOD_ID, "lightning_assembly_chamber");
 
-    public static final ResourceLocation OVERLOAD_PROCESSING_FACTORY =
-            ResourceLocation.fromNamespaceAndPath(MOD_ID, "overload_processing_factory");
+    public static final Identifier OVERLOAD_PROCESSING_FACTORY =
+            Identifier.fromNamespaceAndPath(MOD_ID, "overload_processing_factory");
 
-    public static final ResourceLocation TESLA_COIL =
-            ResourceLocation.fromNamespaceAndPath(MOD_ID, "tesla_coil");
+    public static final Identifier TESLA_COIL =
+            Identifier.fromNamespaceAndPath(MOD_ID, "tesla_coil");
 
-    public static final ResourceLocation CRYSTAL_CATALYZER =
-            ResourceLocation.fromNamespaceAndPath(MOD_ID, "crystal_catalyzer");
+    public static final Identifier CRYSTAL_CATALYZER =
+            Identifier.fromNamespaceAndPath(MOD_ID, "crystal_catalyzer");
 
     /**
      * Immutable list of the five block entities that participate in the AE2LT
@@ -50,7 +50,7 @@ public final class AE2LTBlockEntityIds {
      * registered upstream). Iteration order is stable and matches the order the
      * machines were introduced in AE2LT.
      */
-    public static final List<ResourceLocation> LIGHTNING_GRID_MEMBERS = List.of(
+    public static final List<Identifier> LIGHTNING_GRID_MEMBERS = List.of(
             LIGHTNING_COLLECTOR,
             LIGHTNING_SIMULATION_ROOM,
             LIGHTNING_ASSEMBLY_CHAMBER,

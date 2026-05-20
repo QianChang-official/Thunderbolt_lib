@@ -1,14 +1,9 @@
 package com.qianchang.ae2lt_api.internal.compat;
 
-import appeng.api.config.Actionable;
-import appeng.api.networking.security.IActionHost;
-import appeng.api.networking.security.IActionSource;
-import appeng.api.stacks.AEKey;
-import appeng.api.storage.MEStorage;
 import com.qianchang.ae2lt_api.AE2LTAddonFramework;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -27,16 +22,21 @@ final class AE2LTReflection {
     private static final String NATURAL_HANDLER_CLASS = "com.moakiee.ae2lt.event.NaturalLightningTransformationHandler";
     private static final String COMMON_CONFIG_CLASS = "com.moakiee.ae2lt.config.AE2LTCommonConfig";
     private static final String LIGHTNING_COLLECTOR_CLASS = "com.moakiee.ae2lt.blockentity.LightningCollectorBlockEntity";
+    private static final String ACTIONABLE_CLASS = "appeng.api.config.Actionable";
+    private static final String ACTION_HOST_CLASS = "appeng.api.networking.security.IActionHost";
+    private static final String ACTION_SOURCE_CLASS = "appeng.api.networking.security.IActionSource";
+    private static final String AE_KEY_CLASS = "appeng.api.stacks.AEKey";
+    private static final String ME_STORAGE_CLASS = "appeng.api.storage.MEStorage";
 
     // AE2LT 1.0.2 publicly registers LIGHTNING_ENERGY_BLOCK on these five
     // grid-connected machines. Crystal Catalyzer runs on FE only, so it is
     // intentionally excluded. AE2LT 1.0.5 left this list unchanged.
-    private static final List<ResourceLocation> BRIDGED_BLOCK_ENTITY_IDS = List.of(
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_collector"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_simulation_room"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_assembly_chamber"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "overload_processing_factory"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "tesla_coil"));
+    private static final List<Identifier> BRIDGED_BLOCK_ENTITY_IDS = List.of(
+            Identifier.fromNamespaceAndPath("ae2lt", "lightning_collector"),
+            Identifier.fromNamespaceAndPath("ae2lt", "lightning_simulation_room"),
+            Identifier.fromNamespaceAndPath("ae2lt", "lightning_assembly_chamber"),
+            Identifier.fromNamespaceAndPath("ae2lt", "overload_processing_factory"),
+            Identifier.fromNamespaceAndPath("ae2lt", "tesla_coil"));
 
     /** Per-call-site cache for hot-path reflective method/field lookups. */
     private static final ConcurrentMap<MethodKey, Method> METHOD_CACHE = new ConcurrentHashMap<>();
@@ -64,7 +64,7 @@ final class AE2LTReflection {
     private AE2LTReflection() {
     }
 
-    static List<ResourceLocation> bridgedBlockEntityIds() {
+    static List<Identifier> bridgedBlockEntityIds() {
         return BRIDGED_BLOCK_ENTITY_IDS;
     }
 
@@ -72,12 +72,12 @@ final class AE2LTReflection {
         return getGridInventory(blockEntity) != null;
     }
 
-    static long extractFromGrid(BlockEntity blockEntity, LightningEnergyTier tier, long amount, Actionable actionable) {
-        return transferWithGrid(blockEntity, tier, amount, actionable, false);
+    static long extractFromGrid(BlockEntity blockEntity, LightningEnergyTier tier, long amount, boolean simulate) {
+        return transferWithGrid(blockEntity, tier, amount, simulate, false);
     }
 
-    static long insertIntoGrid(BlockEntity blockEntity, LightningEnergyTier tier, long amount, Actionable actionable) {
-        return transferWithGrid(blockEntity, tier, amount, actionable, true);
+    static long insertIntoGrid(BlockEntity blockEntity, LightningEnergyTier tier, long amount, boolean simulate) {
+        return transferWithGrid(blockEntity, tier, amount, simulate, true);
     }
 
     static boolean isLightningCollector(BlockEntity blockEntity) {
@@ -210,29 +210,33 @@ final class AE2LTReflection {
             BlockEntity blockEntity,
             LightningEnergyTier tier,
             long amount,
-            Actionable actionable,
+            boolean simulate,
             boolean insert) {
         if (amount <= 0L) {
             return 0L;
         }
-        if (!(blockEntity instanceof IActionHost actionHost)) {
+        Object actionHost = asActionHost(blockEntity);
+        if (actionHost == null) {
             return 0L;
         }
 
-        MEStorage storage = getGridInventory(blockEntity);
+        Object storage = getGridInventory(blockEntity);
         if (storage == null) {
             return 0L;
         }
 
         Object key = getLightningKey(tier);
-        if (!(key instanceof AEKey aeKey)) {
+        if (!isInstanceOf(key, AE_KEY_CLASS)) {
             return 0L;
         }
 
-        IActionSource source = IActionSource.ofMachine(actionHost);
-        return insert
-                ? storage.insert(aeKey, amount, actionable, source)
-                : storage.extract(aeKey, amount, actionable, source);
+        Object actionable = getActionable(simulate);
+        Object source = getActionSource(actionHost);
+        if (actionable == null || source == null) {
+            return 0L;
+        }
+
+        return invokeStorageTransfer(storage, insert ? "insert" : "extract", key, amount, actionable, source);
     }
 
     private static Object getLightningKey(LightningEnergyTier tier) {
@@ -252,7 +256,7 @@ final class AE2LTReflection {
         }
     }
 
-    private static MEStorage getGridInventory(BlockEntity blockEntity) {
+    private static Object getGridInventory(BlockEntity blockEntity) {
         try {
             Object mainNode = invoke(blockEntity, "getMainNode", new Class<?>[0]);
             if (mainNode == null) {
@@ -267,11 +271,73 @@ final class AE2LTReflection {
                 return null;
             }
             Object inventory = invoke(storageService, "getInventory", new Class<?>[0]);
-            return inventory instanceof MEStorage storage ? storage : null;
+            return isInstanceOf(inventory, ME_STORAGE_CLASS) ? inventory : null;
         } catch (IllegalStateException e) {
             AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to access AE2LT grid storage bridge: {}", e.getMessage());
             return null;
         }
+    }
+
+    private static Object asActionHost(BlockEntity blockEntity) {
+        return isInstanceOf(blockEntity, ACTION_HOST_CLASS) ? blockEntity : null;
+    }
+
+    private static Object getActionable(boolean simulate) {
+        Class<?> actionableClass = loadClass(ACTIONABLE_CLASS);
+        if (actionableClass == null || !Enum.class.isAssignableFrom(actionableClass)) {
+            return null;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Class<? extends Enum> enumClass = (Class<? extends Enum>) actionableClass.asSubclass(Enum.class);
+            return Enum.valueOf(enumClass, simulate ? "SIMULATE" : "MODULATE");
+        } catch (IllegalArgumentException e) {
+            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to resolve AppEng Actionable {} enum constant.", simulate ? "SIMULATE" : "MODULATE", e);
+            return null;
+        }
+    }
+
+    private static Object getActionSource(Object actionHost) {
+        try {
+            Class<?> actionHostClass = loadClass(ACTION_HOST_CLASS);
+            Class<?> actionSourceClass = loadClass(ACTION_SOURCE_CLASS);
+            if (actionHostClass == null || actionSourceClass == null) {
+                return null;
+            }
+            Method ofMachine = actionSourceClass.getMethod("ofMachine", actionHostClass);
+            return ofMachine.invoke(null, actionHost);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to resolve AppEng machine action source.", e);
+            return null;
+        }
+    }
+
+    private static long invokeStorageTransfer(
+            Object storage,
+            String methodName,
+            Object key,
+            long amount,
+            Object actionable,
+            Object source) {
+        try {
+            Class<?> keyClass = loadClass(AE_KEY_CLASS);
+            Class<?> actionableClass = loadClass(ACTIONABLE_CLASS);
+            Class<?> actionSourceClass = loadClass(ACTION_SOURCE_CLASS);
+            if (keyClass == null || actionableClass == null || actionSourceClass == null) {
+                return 0L;
+            }
+            Method method = storage.getClass().getMethod(methodName, keyClass, long.class, actionableClass, actionSourceClass);
+            Object value = method.invoke(storage, key, amount, actionable, source);
+            return value instanceof Number number ? number.longValue() : 0L;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to invoke AppEng MEStorage#{} reflectively.", methodName, e);
+            return 0L;
+        }
+    }
+
+    private static boolean isInstanceOf(Object value, String className) {
+        Class<?> type = loadClass(className);
+        return type != null && value != null && type.isInstance(value);
     }
 
     private static Method findMethod(Class<?> type, String name, Class<?>... parameterTypes) {

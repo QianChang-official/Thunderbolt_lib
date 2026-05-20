@@ -3,7 +3,7 @@ package com.qianchang.ae2lt_api.api.bridge;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyApi;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Detection helpers for AE2 Lightning Tech's own first-party API package
@@ -56,14 +56,14 @@ public final class AE2LTNativeBridge {
     private static final String LIGHTNING_ENERGY = "lightning_energy";
     private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
 
-    private static final ResourceLocation NATIVE_LIGHTNING_ENERGY_BLOCK_ID =
-            ResourceLocation.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY);
-    private static final ResourceLocation NATIVE_LIGHTNING_ENERGY_ITEM_ID =
-            ResourceLocation.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY_ITEM);
-    private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_BLOCK_ID =
-            ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY);
-    private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_ITEM_ID =
-            ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY_ITEM);
+    private static final Identifier NATIVE_LIGHTNING_ENERGY_BLOCK_ID =
+            Identifier.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY);
+    private static final Identifier NATIVE_LIGHTNING_ENERGY_ITEM_ID =
+            Identifier.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY_ITEM);
+    private static final Identifier LIBRARY_LIGHTNING_ENERGY_BLOCK_ID =
+            Identifier.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY);
+    private static final Identifier LIBRARY_LIGHTNING_ENERGY_ITEM_ID =
+            Identifier.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY_ITEM);
 
     private static volatile Boolean cachedNativeApiAvailability;
     private static volatile Boolean cachedFrequencyBindingAvailability;
@@ -244,7 +244,7 @@ public final class AE2LTNativeBridge {
      *
      * @since 1.0.4
      */
-    public static ResourceLocation nativeLightningEnergyBlockId() {
+    public static Identifier nativeLightningEnergyBlockId() {
         return NATIVE_LIGHTNING_ENERGY_BLOCK_ID;
     }
 
@@ -253,7 +253,7 @@ public final class AE2LTNativeBridge {
      *
      * @since 1.0.4
      */
-    public static ResourceLocation nativeLightningEnergyItemId() {
+    public static Identifier nativeLightningEnergyItemId() {
         return NATIVE_LIGHTNING_ENERGY_ITEM_ID;
     }
 
@@ -262,7 +262,7 @@ public final class AE2LTNativeBridge {
      *
      * @since 1.0.4
      */
-    public static ResourceLocation libraryLightningEnergyBlockId() {
+    public static Identifier libraryLightningEnergyBlockId() {
         return LIBRARY_LIGHTNING_ENERGY_BLOCK_ID;
     }
 
@@ -271,7 +271,7 @@ public final class AE2LTNativeBridge {
      *
      * @since 1.0.4
      */
-    public static ResourceLocation libraryLightningEnergyItemId() {
+    public static Identifier libraryLightningEnergyItemId() {
         return LIBRARY_LIGHTNING_ENERGY_ITEM_ID;
     }
 

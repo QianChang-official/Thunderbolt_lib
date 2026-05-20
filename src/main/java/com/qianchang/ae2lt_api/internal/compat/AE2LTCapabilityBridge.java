@@ -3,7 +3,7 @@ package com.qianchang.ae2lt_api.internal.compat;
 import com.qianchang.ae2lt_api.AE2LTAddonFramework;
 import com.qianchang.ae2lt_api.api.capability.AE2LTCapabilities;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
@@ -14,7 +14,7 @@ final class AE2LTCapabilityBridge {
 
     static void registerCapabilities(RegisterCapabilitiesEvent event) {
         int registered = 0;
-        for (ResourceLocation id : AE2LTReflection.bridgedBlockEntityIds()) {
+        for (Identifier id : AE2LTReflection.bridgedBlockEntityIds()) {
             if (registerBridge(event, id)) {
                 registered++;
             }
@@ -23,7 +23,7 @@ final class AE2LTCapabilityBridge {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static boolean registerBridge(RegisterCapabilitiesEvent event, ResourceLocation id) {
+    private static boolean registerBridge(RegisterCapabilitiesEvent event, Identifier id) {
         BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(id).orElse(null);
         if (type == null) {
             AE2LTAddonFramework.LOGGER.warn("[AE2LT API] Skipping missing AE2LT block entity type {}.", id);

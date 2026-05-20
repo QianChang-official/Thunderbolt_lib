@@ -36,6 +36,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class AE2LTCapabilities {
 
+    private static final String MOD_ID = "ae2lt_api";
+
     /** Current API version — bump when breaking changes are introduced. */
         public static final String API_VERSION = "1.0.10";
 
@@ -48,8 +50,7 @@ public final class AE2LTCapabilities {
      */
     public static final BlockCapability<ILightningEnergyHandler, @Nullable Direction> LIGHTNING_ENERGY_BLOCK =
             BlockCapability.createSided(
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
-                            "ae2lt_api", "lightning_energy"),
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD_ID, "lightning_energy"),
                     ILightningEnergyHandler.class);
 
     /**
@@ -59,8 +60,7 @@ public final class AE2LTCapabilities {
      */
     public static final ItemCapability<ILightningEnergyHandler, Void> LIGHTNING_ENERGY_ITEM =
             ItemCapability.createVoid(
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
-                            "ae2lt_api", "lightning_energy_item"),
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD_ID, "lightning_energy_item"),
                     ILightningEnergyHandler.class);
 
     private AE2LTCapabilities() {}

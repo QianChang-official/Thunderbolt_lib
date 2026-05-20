@@ -1,6 +1,5 @@
 package com.qianchang.ae2lt_api.internal.compat;
 
-import appeng.api.config.Actionable;
 import com.qianchang.ae2lt_api.api.lightning.ILightningEnergyHandler;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -15,7 +14,7 @@ final class ReflectiveGridLightningHandler implements ILightningEnergyHandler {
 
     @Override
     public long getLightningStored(LightningEnergyTier tier) {
-        return AE2LTReflection.extractFromGrid(owner, tier, Long.MAX_VALUE, Actionable.SIMULATE);
+        return AE2LTReflection.extractFromGrid(owner, tier, Long.MAX_VALUE, true);
     }
 
     @Override
@@ -25,12 +24,12 @@ final class ReflectiveGridLightningHandler implements ILightningEnergyHandler {
 
     @Override
     public long insertLightning(LightningEnergyTier tier, long amount, boolean simulate) {
-        return AE2LTReflection.insertIntoGrid(owner, tier, amount, simulate ? Actionable.SIMULATE : Actionable.MODULATE);
+        return AE2LTReflection.insertIntoGrid(owner, tier, amount, simulate);
     }
 
     @Override
     public long extractLightning(LightningEnergyTier tier, long amount, boolean simulate) {
-        return AE2LTReflection.extractFromGrid(owner, tier, amount, simulate ? Actionable.SIMULATE : Actionable.MODULATE);
+        return AE2LTReflection.extractFromGrid(owner, tier, amount, simulate);
     }
 
     @Override

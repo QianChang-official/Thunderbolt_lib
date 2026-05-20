@@ -27,13 +27,13 @@ ${mod_description}
 [[dependencies.${mod_id}]]
     modId="ae2"
     type="required"
-    versionRange="[19.1,)"
+    versionRange="[0,)"
     ordering="AFTER"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="ae2lt"
     type="required"
-    versionRange="[1.0.10,)"
+    versionRange="[1.0.0alpha-26.1.2neoforge,)"
     ordering="AFTER"
     side="BOTH"
