@@ -2,6 +2,30 @@
 
 This file tracks release-gate items that must survive across sessions.
 
+## 1.0.10-alpha.26.1.2neoforge Compatibility Gate
+
+Status: isolated build validation passed; branch ready for continued 26.1.2 integration testing.
+
+This line tracks the isolated `Thunderbolt_lib_neoforge_26.1.2` environment for the
+AE2LT `port/26.1.2-neoforge` branch. The goal is to keep the addon-facing API stable
+while failing closed when the high-version AppEng / AE2LT runtime contract drifts.
+
+### Required Before Branch Promotion
+
+- [x] Move the migration work out of `Thunderbolt_lib_neoforge_1.21.1` and into an isolated `Thunderbolt_lib_neoforge_26.1.2` directory.
+- [x] Switch the branch toolchain to JDK 25 + Gradle 9.2.1 + NeoForge `26.1.2.21-beta`.
+- [x] Review AE2LT `origin/port/26.1.2-neoforge` for public event / frequency API drift.
+- [x] Remove the remaining direct AE2 compile-time dependency from the branch and keep AppEng access reflective.
+- [x] Add runtime preflight for the verified AppEng / AE2LT grid bridge contract so capability registration fails closed when incompatible.
+- [x] Run `./gradlew.bat clean build --no-daemon` successfully in the isolated directory.
+
+### Validation Notes
+
+- Validation scope: isolated-branch source comparison against AE2LT `origin/port/26.1.2-neoforge`, JDK 25 environment verification, and local Gradle build validation in `Thunderbolt_lib_neoforge_26.1.2`.
+- The verified AE2LT port exposes the same public `LightningCollectedEvent` and `com.moakiee.ae2lt.api.frequency.*` contracts consumed by Thunderbolt_lib.
+- The verified AE2LT port still uses `IActionHost#getActionableNode()`, `grid.getStorageService().getInventory()`, `getCachedInventory()`, and `IActionSource.ofMachine(...)`, so the reflective grid bridge was updated to match that contract more closely.
+- Local validation passed with `./gradlew.bat clean build --no-daemon`; produced `build/libs/Thunderbolt_lib-1.0.10-alpha.26.1.2neoforge.jar`.
+
 ## 1.0.10 Release Gate
 
 Status: build validation passed; release unblocked for the AE2LT 1.0.9 / 1.0.10 alignment scope.

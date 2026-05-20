@@ -25,6 +25,8 @@ final class AE2LTReflection {
     private static final String ACTIONABLE_CLASS = "appeng.api.config.Actionable";
     private static final String ACTION_HOST_CLASS = "appeng.api.networking.security.IActionHost";
     private static final String ACTION_SOURCE_CLASS = "appeng.api.networking.security.IActionSource";
+    private static final String GRID_NODE_CLASS = "appeng.api.networking.IGridNode";
+    private static final String GRID_CLASS = "appeng.api.networking.IGrid";
     private static final String AE_KEY_CLASS = "appeng.api.stacks.AEKey";
     private static final String ME_STORAGE_CLASS = "appeng.api.storage.MEStorage";
 
@@ -44,6 +46,7 @@ final class AE2LTReflection {
     /** Cache marker for "method/field not found" so we don't re-walk the class hierarchy each tick. */
     private static final Method MISSING_METHOD;
     private static final Field MISSING_FIELD;
+    private static volatile Boolean cachedGridBridgeAvailability;
 
     static {
         try {
@@ -68,8 +71,30 @@ final class AE2LTReflection {
         return BRIDGED_BLOCK_ENTITY_IDS;
     }
 
+    static boolean isGridBridgeAvailable() {
+        Boolean cached = cachedGridBridgeAvailability;
+        if (cached != null) {
+            return cached;
+        }
+        boolean available = validateGridBridgeContract();
+        cachedGridBridgeAvailability = available;
+        return available;
+    }
+
     static boolean hasGrid(BlockEntity blockEntity) {
-        return getGridInventory(blockEntity) != null;
+        return resolveGrid(blockEntity) != null;
+    }
+
+    static long getStoredInGrid(BlockEntity blockEntity, LightningEnergyTier tier) {
+        Object cachedInventory = getCachedGridInventory(blockEntity);
+        if (cachedInventory == null) {
+            return 0L;
+        }
+        Object key = getLightningKey(tier);
+        if (!isInstanceOf(key, AE_KEY_CLASS)) {
+            return 0L;
+        }
+        return invokeCachedStorageRead(cachedInventory, key);
     }
 
     static long extractFromGrid(BlockEntity blockEntity, LightningEnergyTier tier, long amount, boolean simulate) {
@@ -239,6 +264,50 @@ final class AE2LTReflection {
         return invokeStorageTransfer(storage, insert ? "insert" : "extract", key, amount, actionable, source);
     }
 
+    private static boolean validateGridBridgeContract() {
+        try {
+            Class<?> actionHostClass = requireClass(ACTION_HOST_CLASS);
+            Class<?> actionSourceClass = requireClass(ACTION_SOURCE_CLASS);
+            Class<?> actionableClass = requireClass(ACTIONABLE_CLASS);
+            Class<?> gridNodeClass = requireClass(GRID_NODE_CLASS);
+            Class<?> gridClass = requireClass(GRID_CLASS);
+            Class<?> aeKeyClass = requireClass(AE_KEY_CLASS);
+            Class<?> meStorageClass = requireClass(ME_STORAGE_CLASS);
+            Class<?> lightningKeyClass = requireClass(LIGHTNING_KEY_CLASS);
+
+            resolveRequiredMethod(actionHostClass, "getActionableNode");
+            Method getGrid = resolveRequiredMethod(gridNodeClass, "getGrid");
+            if (getGrid.getReturnType() != gridClass) {
+                throw new IllegalStateException("AppEng IGridNode#getGrid no longer returns appeng.api.networking.IGrid");
+            }
+
+            Method getStorageService = resolveRequiredMethod(gridClass, "getStorageService");
+            Class<?> storageServiceClass = getStorageService.getReturnType();
+            resolveRequiredMethod(storageServiceClass, "getInventory");
+            resolveRequiredMethod(storageServiceClass, "getCachedInventory");
+            resolveRequiredMethod(actionSourceClass, "ofMachine", actionHostClass);
+            resolveRequiredMethod(meStorageClass, "insert", aeKeyClass, long.class, actionableClass, actionSourceClass);
+            resolveRequiredMethod(meStorageClass, "extract", aeKeyClass, long.class, actionableClass, actionSourceClass);
+
+            lightningKeyClass.getField("HIGH_VOLTAGE");
+            lightningKeyClass.getField("EXTREME_HIGH_VOLTAGE");
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.warn(
+                    "[AE2LT API] AppEng/AE2LT grid bridge preflight failed; lightning capability bridging will fail closed until the runtime contract matches the verified 26.1.2 port line.",
+                    e);
+            return false;
+        }
+    }
+
+    private static Class<?> requireClass(String className) {
+        Class<?> type = loadClass(className);
+        if (type == null) {
+            throw new IllegalStateException("Required compatibility class is missing: " + className);
+        }
+        return type;
+    }
+
     private static Object getLightningKey(LightningEnergyTier tier) {
         String fieldName = tier == LightningEnergyTier.EXTREME_HIGH_VOLTAGE
                 ? "EXTREME_HIGH_VOLTAGE"
@@ -258,11 +327,7 @@ final class AE2LTReflection {
 
     private static Object getGridInventory(BlockEntity blockEntity) {
         try {
-            Object mainNode = invoke(blockEntity, "getMainNode", new Class<?>[0]);
-            if (mainNode == null) {
-                return null;
-            }
-            Object grid = invoke(mainNode, "getGrid", new Class<?>[0]);
+            Object grid = resolveGrid(blockEntity);
             if (grid == null) {
                 return null;
             }
@@ -276,6 +341,47 @@ final class AE2LTReflection {
             AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to access AE2LT grid storage bridge: {}", e.getMessage());
             return null;
         }
+    }
+
+    private static Object getCachedGridInventory(BlockEntity blockEntity) {
+        try {
+            Object grid = resolveGrid(blockEntity);
+            if (grid == null) {
+                return null;
+            }
+            Object storageService = invoke(grid, "getStorageService", new Class<?>[0]);
+            if (storageService == null) {
+                return null;
+            }
+            return invoke(storageService, "getCachedInventory", new Class<?>[0]);
+        } catch (IllegalStateException e) {
+            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to access AE2LT cached grid inventory bridge: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private static Object resolveGrid(BlockEntity blockEntity) {
+        try {
+            Object node = resolveGridNode(blockEntity);
+            if (node == null) {
+                return null;
+            }
+            return invoke(node, "getGrid", new Class<?>[0]);
+        } catch (IllegalStateException e) {
+            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to resolve AE2LT grid node bridge: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private static Object resolveGridNode(BlockEntity blockEntity) {
+        Object actionHost = asActionHost(blockEntity);
+        if (actionHost != null) {
+            Object actionableNode = invoke(actionHost, "getActionableNode", new Class<?>[0]);
+            if (actionableNode != null) {
+                return actionableNode;
+            }
+        }
+        return invoke(blockEntity, "getMainNode", new Class<?>[0]);
     }
 
     private static Object asActionHost(BlockEntity blockEntity) {
@@ -331,6 +437,21 @@ final class AE2LTReflection {
             return value instanceof Number number ? number.longValue() : 0L;
         } catch (ReflectiveOperationException | RuntimeException e) {
             AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to invoke AppEng MEStorage#{} reflectively.", methodName, e);
+            return 0L;
+        }
+    }
+
+    private static long invokeCachedStorageRead(Object cachedInventory, Object key) {
+        try {
+            Class<?> keyClass = loadClass(AE_KEY_CLASS);
+            if (keyClass == null) {
+                return 0L;
+            }
+            Method method = cachedInventory.getClass().getMethod("get", keyClass);
+            Object value = method.invoke(cachedInventory, key);
+            return value instanceof Number number ? number.longValue() : 0L;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            AE2LTAddonFramework.LOGGER.debug("[AE2LT API] Failed to read AppEng cached inventory reflectively.", e);
             return 0L;
         }
     }

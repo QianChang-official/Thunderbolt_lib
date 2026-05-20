@@ -9,9 +9,13 @@ import java.util.Optional;
  * Version helpers for addon code that needs to gate AE2 Lightning Tech
  * integration behavior at runtime.
  *
- * <p>AE2LT 1.0.10 keeps the first-party lightning capability/event contracts
- * used by the previous checked release lines. The public wireless frequency
- * API introduced in 1.0.8 remains compatible across the 1.0.9 / 1.0.10 line.</p>
+ * <p>This branch targets AE2LT's 26.1.2 NeoForge port line
+ * ({@code 1.0.0alpha-26.1.2neoforge}). That port keeps the first-party
+ * lightning capability/event contracts and the public wireless frequency API
+ * introduced by the stable 1.0.x line, but its version string no longer sorts
+ * cleanly against the earlier semantic-style releases. The helpers below treat
+ * the verified 26.1.2 port as feature-compatible with the checked 1.0.10 API
+ * surface.</p>
  *
  * @since 1.0.4
  */
@@ -20,8 +24,11 @@ public final class AE2LTVersion {
     /** Thunderbolt_lib API version for this jar. */
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
-    /** AE2 Lightning Tech release this Thunderbolt_lib version was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.10";
+    /** AE2 Lightning Tech port release this Thunderbolt_lib branch was checked against. */
+    public static final String TARGET_AE2LT_VERSION = "1.0.0alpha-26.1.2neoforge";
+
+    /** Latest stable AE2LT release line whose public API shape was also reviewed. */
+    public static final String LAST_VERIFIED_STABLE_AE2LT_VERSION = "1.0.10";
 
     /** First AE2LT release line that exposed the native first-party API package. */
     public static final String FIRST_PARTY_API_INTRODUCED_VERSION = "1.0.2";
@@ -66,7 +73,7 @@ public final class AE2LTVersion {
      */
     public static boolean isLoadedAE2LTAtLeast(String minimumVersion) {
         return loadedAE2LTVersion()
-                .map(version -> compareDottedVersions(version, minimumVersion) >= 0)
+                .map(version -> compareFeatureAwareVersions(version, minimumVersion) >= 0)
                 .orElse(false);
     }
 
@@ -111,8 +118,29 @@ public final class AE2LTVersion {
      * known-compatible until checked.
      */
     public static boolean isKnownCompatibleAE2LTVersion(String version) {
-        return compareDottedVersions(version, FIRST_PARTY_API_INTRODUCED_VERSION) >= 0
-                && compareDottedVersions(version, FIRST_PARTY_API_LAST_VERIFIED_VERSION) <= 0;
+        return isVerifiedPortVersion(version)
+                || (compareDottedVersions(version, FIRST_PARTY_API_INTRODUCED_VERSION) >= 0
+                && compareDottedVersions(version, LAST_VERIFIED_STABLE_AE2LT_VERSION) <= 0);
+    }
+
+    /** Returns whether {@code version} is the verified 26.1.2 NeoForge port line. */
+    public static boolean isVerifiedPortVersion(String version) {
+        return version != null && version.contains("26.1.2neoforge");
+    }
+
+    private static int compareFeatureAwareVersions(String loadedVersion, String minimumVersion) {
+        if (isVerifiedPortVersion(loadedVersion)) {
+            if (isVerifiedPortVersion(minimumVersion)) {
+                return 0;
+            }
+            if (compareDottedVersions(minimumVersion, LAST_VERIFIED_STABLE_AE2LT_VERSION) <= 0) {
+                return 1;
+            }
+        }
+        if (isVerifiedPortVersion(minimumVersion)) {
+            return isVerifiedPortVersion(loadedVersion) ? 0 : -1;
+        }
+        return compareDottedVersions(loadedVersion, minimumVersion);
     }
 
     /**

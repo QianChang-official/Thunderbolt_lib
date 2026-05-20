@@ -5,8 +5,8 @@
 `Thunderbolt_lib` is the addon API and runtime bridge library for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech).
 
 > Runtime mod id remains `ae2lt_api`.
-> Target versions: AE2 Lightning Tech 1.0.10, Minecraft 1.21.1, NeoForge 21.1.x.
-> Latest release: **1.0.10** — see [CHANGELOG.md](CHANGELOG.md).
+> Target branch: AE2 Lightning Tech `1.0.0alpha-26.1.2neoforge`, Minecraft `26.1.2`, NeoForge `26.1.2.21-beta`, JDK `25`.
+> Current branch artifact: **1.0.10-alpha.26.1.2neoforge** — see [CHANGELOG.md](CHANGELOG.md).
 
 ## What It Provides
 
@@ -41,9 +41,9 @@
 
 The same five IDs are exposed as `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS` (and individually as `LIGHTNING_COLLECTOR`, etc.) for addon code that wants to iterate or query without hardcoding strings.
 
-## Relationship to AE2LT 1.0.10's First-Party API
+## Relationship to the AE2LT 26.1.2 Port's First-Party API
 
-AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. Thunderbolt_lib 1.0.10 targets the AE2LT 1.0.10 line, keeps the existing namespace split, keeps the collector compatibility mirror from 1.0.7, verifies compatibility with the wireless-frequency changes shipped through AE2LT 1.0.9 / 1.0.10, and extends the reflective bridge around AE2LT's public frequency API. The two namespaces remain deliberately distinct:
+AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. This branch targets the AE2LT `1.0.0alpha-26.1.2neoforge` port line, keeps the existing namespace split, keeps the collector compatibility mirror from 1.0.7, carries forward the public wireless-frequency bridge, and adds stronger fail-closed guards around the high-version AppEng / AE2LT grid contract. The two namespaces remain deliberately distinct:
 
 | | Library (this repo) | AE2LT first-party |
 |--|---------------------|-------------------|
@@ -53,20 +53,20 @@ AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` 
 | Tier enum | `LightningEnergyTier` | `LightningTier` |
 | Recipe builders | yes | no |
 | Plugin loader | yes | no |
-| Runtime without AE2LT loaded | no; metadata requires AE2LT 1.0.10+ | no |
+| Runtime without AE2LT loaded | no; metadata requires AE2LT `1.0.0alpha-26.1.2neoforge+` on this branch | no |
 
-For most addons, the library remains the right choice: it exposes recipe builders, plugin loading, version helpers, and a byte-stable API surface across Thunderbolt_lib releases. Use `AE2LTNativeBridge.isNativeApiAvailable()` to detect whether AE2LT's first-party API is loaded at runtime, and `AE2LTVersion` when you need version gates.
+For most addons, the library remains the right choice: it exposes recipe builders, plugin loading, version helpers, and a stable addon-facing API surface while keeping the AE2 / AE2LT integration logic reflective. Use `AE2LTNativeBridge.isNativeApiAvailable()` to detect whether AE2LT's first-party API is loaded at runtime, and `AE2LTVersion` when you need feature gates that understand both the stable `1.0.x` line and the verified `26.1.2` port string.
 
 `LightningCollectedEvent` now mirrors AE2LT's own public collector event instead of taking over lightning-entity ticks. Library listeners still receive a cancellable event with HV/EHV convenience accessors, and any cancellation or active-tier amount rewrite is synchronized back onto AE2LT's public event before the collector inserts into the grid.
 
 AE2LT 1.0.8 adds `com.moakiee.ae2lt.api.frequency.FrequencyApi`. Thunderbolt_lib mirrors its public query surface through `AE2LTFrequencyApi` without putting AE2LT classes in public method signatures. Addons can query bound frequency ids, frequency metadata, transmitter locations, current validity, public binding-host display names, public menu-host block positions/tokens, and can request AE2LT's shared binding screen through the static helper or the `AE2LTAPI` facade. The provider SPI and public host/access/menu contracts are still surfaced as class-name constants so advanced integrations can decide when they want to compile directly against AE2LT's first-party API jar.
 
-If that compatibility mirror cannot initialize because AE2LT's public event contract is missing or has drifted, Thunderbolt_lib now fails closed: the library-side `LightningCollectedEvent` will stop firing, but the reflective block-entity capability bridge, recipe builders, and plugin/bootstrap surface remain available. This project still declares AE2LT as a required runtime dependency, so "Thunderbolt_lib without AE2LT" is not a supported player install state.
+If that compatibility mirror cannot initialize because AE2LT's public event contract is missing or has drifted, Thunderbolt_lib now fails closed: the library-side `LightningCollectedEvent` will stop firing, but the reflective block-entity capability bridge, recipe builders, and plugin/bootstrap surface remain available. The high-version grid capability bridge now also performs a startup contract preflight against AppEng / AE2LT runtime classes and refuses to register if the verified `26.1.2` storage contract is not present. This project still declares AE2LT as a required runtime dependency, so "Thunderbolt_lib without AE2LT" is not a supported player install state.
 
 ## Runtime Naming
 
 - Git repository / project name: `Thunderbolt_lib`
-- Built jar name: `Thunderbolt_lib-1.0.10.jar`
+- Built jar name: `Thunderbolt_lib-1.0.10-alpha.26.1.2neoforge.jar`
 - Runtime mod id: `ae2lt_api`
 
 Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarations in `neoforge.mods.toml` and capability lookups.
@@ -90,14 +90,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 [[dependencies.your_mod_id]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.10,)"
+    versionRange = "[1.0.10-alpha.26.1.2neoforge,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.your_mod_id]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.10,)"
+    versionRange = "[1.0.0alpha-26.1.2neoforge,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -109,13 +109,14 @@ Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarati
 ```
 
 ```text
-build/libs/Thunderbolt_lib-1.0.10.jar
+build/libs/Thunderbolt_lib-1.0.10-alpha.26.1.2neoforge.jar
 ```
 
 ## Versioning
 
 This project tracks AE2 Lightning Tech's release line. See [CHANGELOG.md](CHANGELOG.md) for per-version notes.
 
+- `1.0.10-alpha.26.1.2neoforge` — isolated migration branch for the AE2LT `26.1.2` NeoForge port. Upgrades the toolchain to JDK 25 / Gradle 9, migrates identifier usage to the new `net.minecraft.resources.Identifier` API, makes the remaining AppEng interaction fully reflective, aligns grid reads with AE2LT's `GridLightningEnergyHandler`, and adds startup contract preflight so capability bridging fails closed on incompatible high-version AE2 / AE2LT runtimes.
 - `1.0.10` — tracks AE2LT 1.0.10, verifies the AE2LT 1.0.9 / 1.0.10 wireless-frequency line, adds reflective helpers for public frequency binding hosts / menus plus a fail-closed shared binding-screen request bridge, and hardens plugin discovery against duplicate or malformed service entries.
 - `1.0.8` — tracks AE2LT 1.0.8 and adds a reflective bridge for the new public wireless frequency API: bound-frequency id lookup, frequency metadata snapshots, transmitter location snapshots, validity checks, and class-name constants for the public binding/UI contracts.
 - `1.0.7` — tracks AE2LT 1.0.7 and ships the collector-event compatibility hotfix: Thunderbolt_lib now mirrors AE2LT's public `LightningCollectedEvent`, keeps cancellation/amount rewrites inside AE2LT's native collector flow, and records runtime verification scope as GameTest integration validation + client startup compatibility + log scanning.

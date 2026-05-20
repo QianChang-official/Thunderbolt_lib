@@ -13,6 +13,12 @@ final class AE2LTCapabilityBridge {
     }
 
     static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        if (!AE2LTReflection.isGridBridgeAvailable()) {
+            AE2LTAddonFramework.LOGGER.warn(
+                    "[AE2LT API] Skipping AE2LT lightning capability bridge registration because the verified AppEng/AE2LT runtime contract is unavailable. Thunderbolt_lib will keep other API surfaces active and fail closed for capability bridging.");
+            return;
+        }
+
         int registered = 0;
         for (Identifier id : AE2LTReflection.bridgedBlockEntityIds()) {
             if (registerBridge(event, id)) {

@@ -8,7 +8,7 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 运行时 mod_id 为 `ae2lt_api`，与 AE2LT 主模组（`ae2lt`）刻意保持不同命名空间，便于在 `mods.toml` 中分别声明依赖，也便于在出现命名冲突或迁移时由 API 一侧承接桥接职责。
 
-适用于 AE2 Lightning Tech 1.0.10 / Minecraft 1.21.1 / NeoForge 21.1.x / Java 21。
+适用于 AE2 Lightning Tech `1.0.0alpha-26.1.2neoforge` / Minecraft `26.1.2` / NeoForge `26.1.2.21-beta` / Java 25。
 
 ## 功能
 
@@ -24,7 +24,7 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 ### 运行时桥接
 
-`AE2LTNativeBridge` 是一组运行时探测工具，下游模组可在加载早期通过它判断当前是否真的有 AE2LT 主模组在运行，并以 `ResourceLocation` 的形式安全引用主模组中的方块实体类型与配方类型。这一层的存在使"AE2LT 不在场也能优雅降级"的可选依赖模式成为可能，避免硬依赖与 `ClassNotFoundException`。
+`AE2LTNativeBridge` 是一组运行时探测工具，下游模组可在加载早期通过它判断当前是否真的有 AE2LT 主模组在运行，并以命名空间 ID 的形式安全引用主模组中的方块实体类型与配方类型。这一层的存在使"AE2LT 不在场也能优雅降级"的可选依赖模式成为可能，避免硬依赖与 `ClassNotFoundException`。
 
 ### 频率绑定桥接
 
@@ -42,11 +42,11 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 
 `LightningCollectedEvent` 现在是对 AE2LT 主模组公开 `com.moakiee.ae2lt.api.event.LightningCollectedEvent` 的镜像事件，而不是由 Thunderbolt_lib 自己接管闪电实体 tick 后单独派发。下游模组仍可在 NeoForge 事件总线上取消该事件或改写当前生效 tier 的能量数量；这些改动会被同步回 AE2LT 的公开事件，再由 AE2LT 原生 collector 流程继续执行，因此自然闪电副作用、培养和 ritual 兼容性都保留在主模组自己的捕获路径里。
 
-如果这个兼容镜像因为 AE2LT 公开事件契约缺失或漂移而无法初始化，Thunderbolt_lib 会失败封闭：库侧 `LightningCollectedEvent` 不再派发，但反射式 capability bridge、配方构建器以及插件/bootstrap 公共面仍然可用。另一方面，本项目在运行时元数据里仍把 AE2LT 声明为必需依赖，所以“只装 Thunderbolt_lib 不装 AE2LT”并不是受支持的玩家安装形态。
+如果这个兼容镜像因为 AE2LT 公开事件契约缺失或漂移而无法初始化，Thunderbolt_lib 会失败封闭：库侧 `LightningCollectedEvent` 不再派发，但反射式 capability bridge、配方构建器以及插件/bootstrap 公共面仍然可用。对 26.1.2 高版本环境，这一分支还会在启动时预检 AppEng / AE2LT 网格存储合同；若检测到 `getActionableNode`、`getStorageService().getInventory()`、`getCachedInventory()` 或 `IActionSource.ofMachine(...)` 等关键运行时契约漂移，则直接停用闪电 capability bridge，而不是带着半坏状态继续运行。另一方面，本项目在运行时元数据里仍把 AE2LT 声明为必需依赖，所以“只装 Thunderbolt_lib 不装 AE2LT”并不是受支持的玩家安装形态。
 
 ### ID 常量
 
-`AE2LTBlockEntityIds` 与 `AE2LTRecipeIds` 集中收录了主模组对外暴露的方块实体类型 ID 与配方类型 ID，作为 `ResourceLocation` 常量提供，避免下游模组手写字面量造成的拼写漂移，并使主模组未来重命名内部资源时可由本前置库统一修补。
+`AE2LTBlockEntityIds` 与 `AE2LTRecipeIds` 集中收录了主模组对外暴露的方块实体类型 ID 与配方类型 ID，作为命名空间 ID 常量提供，避免下游模组手写字面量造成的拼写漂移，并使主模组未来重命名内部资源时可由本前置库统一修补。
 
 ### 插件加载
 
@@ -64,14 +64,14 @@ Thunderbolt_lib（闪枢库）是 AE2 Lightning Tech（AE2LT）的 API 前置库
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.10,)"
+    versionRange = "[1.0.10-alpha.26.1.2neoforge,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.10,)"
+    versionRange = "[1.0.0alpha-26.1.2neoforge,)"
     ordering = "AFTER"
     side = "BOTH"
 ```

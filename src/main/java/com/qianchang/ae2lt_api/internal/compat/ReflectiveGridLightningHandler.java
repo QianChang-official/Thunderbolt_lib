@@ -14,7 +14,7 @@ final class ReflectiveGridLightningHandler implements ILightningEnergyHandler {
 
     @Override
     public long getLightningStored(LightningEnergyTier tier) {
-        return AE2LTReflection.extractFromGrid(owner, tier, Long.MAX_VALUE, true);
+        return AE2LTReflection.getStoredInGrid(owner, tier);
     }
 
     @Override
