@@ -44,6 +44,7 @@ public final class AE2LTNativeBridge {
 
     private static final String NATIVE_CAPABILITIES_CLASS = "com.moakiee.ae2lt.api.AE2LTCapabilities";
     private static final String PUBLIC_FREQUENCY_API_CLASS = AE2LTFrequencyApi.FREQUENCY_API_CLASS_NAME;
+    private static final String PUBLIC_FREQUENCY_API_PROVIDER_CLASS = AE2LTFrequencyApi.FREQUENCY_API_PROVIDER_CLASS_NAME;
     private static final String FREQUENCY_BINDING_HOST_CLASS = AE2LTFrequencyBinding.HOST_CLASS_NAME;
     private static final String FREQUENCY_BINDING_HELPER_CLASS = AE2LTFrequencyBinding.HELPER_CLASS_NAME;
     private static final String PUBLIC_FREQUENCY_BINDING_HOST_CLASS = AE2LTFrequencyApi.FREQUENCY_BINDING_HOST_CLASS_NAME;
@@ -134,6 +135,19 @@ public final class AE2LTNativeBridge {
      */
     public static String frequencyApiClassName() {
         return PUBLIC_FREQUENCY_API_CLASS;
+    }
+
+    /**
+     * Fully-qualified class name of AE2LT's public frequency API provider SPI.
+     *
+     * <p>This provider is installed by AE2LT itself during common setup. Addons
+     * should treat the name as informational and call the static API/bridge
+     * helpers rather than implementing the SPI.</p>
+     *
+     * @since 1.0.10
+     */
+    public static String frequencyApiProviderClassName() {
+        return PUBLIC_FREQUENCY_API_PROVIDER_CLASS;
     }
 
     /**
