@@ -2,6 +2,43 @@
 
 This file tracks release-gate items that must survive across sessions.
 
+## Unified `1.0.10` / `26.1.2` Release Gate
+
+Status: build validation passed for both lines; main-branch release docs refreshed; old standalone `v1.0.10` release replaced with one unified release carrying both renamed jars.
+
+This pass is not a new semantic-version bump. It is a release-operations and documentation consolidation step so the existing stable `1.0.10` release line and the companion `26.1.2` port artifact can be described and published together.
+
+### Required for the unified release refresh
+
+- [x] Re-check local repository state against `Thunderbolt_lib`, `AE2-Lightning-Tech`, and `Applied-Energistics-2` upstreams.
+- [x] Fast-forward the local `AE2-Lightning-Tech` `main` branch when it was found behind `origin/main`.
+- [x] Confirm the isolated `Minecraft26.1.2neoforge` branch still matches `origin/Minecraft26.1.2neoforge`.
+- [x] Rewrite main-branch Markdown docs so the `1.21.1` stable line and the `26.1.2` port line are both versioned explicitly.
+- [x] Re-run `clean build` for `Thunderbolt_lib_neoforge_1.21.1`.
+- [x] Re-run `clean build` for `Thunderbolt_lib_neoforge_26.1.2`.
+- [x] Repackage the two jars under the unified public asset naming scheme.
+- [x] Replace the old standalone `v1.0.10` release assets with a single unified release entry carrying both jars.
+
+### Validation Notes
+
+- `Thunderbolt_lib_neoforge_1.21.1`: local `./gradlew.bat clean build --no-daemon` passed again during this refresh.
+- `Thunderbolt_lib_neoforge_26.1.2`: local `./gradlew.bat clean build --no-daemon` passed again during this refresh.
+- `AE2-Lightning-Tech main` was updated from `1a0e1b4` to `79a3ee1` before the documentation rewrite, so the stable-line summary is based on the current upstream state.
+- `Applied-Energistics-2` was cloned locally for contract review of the AE2-facing high-version bridge surface.
+- GitHub release `v1.0.10` was deleted and recreated with `Thunderbolt_lib_1.21.1_neoforge_1.0.10.jar` plus `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha-26.1.2neoforge.jar`.
+
+## 26.1.2 Port Release Gate
+
+Status: build validation passed; branch remains isolated and compatible with the verified `AE2-Lightning-Tech` `port/26.1.2-neoforge` baseline.
+
+### Required Before Publishing the Port Artifact Alongside `1.0.10`
+
+- [x] Keep the migration in the dedicated `Minecraft26.1.2neoforge` branch / worktree.
+- [x] Upgrade the toolchain to JDK 25 / Gradle 9 and align metadata to NeoForge `26.1.2.21-beta`.
+- [x] Remove the remaining direct AE2 compile-time dependency from the bridge path.
+- [x] Add runtime contract preflight so the high-version bridge fails closed on incompatible AppEng / AE2LT environments.
+- [x] Re-run a full branch-local `clean build` and confirm the alpha jar is produced.
+
 ## 1.0.10 Release Gate
 
 Status: build validation passed; release unblocked for the AE2LT 1.0.9 / 1.0.10 alignment scope.
