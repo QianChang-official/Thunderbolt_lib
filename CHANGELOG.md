@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10-alpha.26.1.2neoforge] - 2026-05-20
+
+### Added
+- Startup preflight for the verified AppEng / AE2LT grid storage contract on the 26.1.2 NeoForge port line. Thunderbolt_lib now refuses to register the lightning capability bridge when the high-version runtime contract drifts.
+- Feature-aware version gating in `AE2LTVersion` so the verified AE2LT `1.0.0alpha-26.1.2neoforge` port line is recognized as compatible with the first-party API and public frequency features carried forward from the stable `1.0.x` line.
+
+### Changed
+- Isolated the 26.1.2 migration into its own worktree / branch baseline with JDK 25, Gradle 9.2.1, and NeoForge `26.1.2.21-beta`.
+- Migrated identifier usage from `net.minecraft.resources.ResourceLocation` to `net.minecraft.resources.Identifier` where required by the 26.1.2 port.
+- Removed the remaining direct AE2 compile-time dependency from the branch by converting AppEng-facing grid operations to fully reflective code.
+- Aligned the reflective grid read path with AE2LT 26.1.2's own `GridLightningEnergyHandler`: stored amounts are now read via `getStorageService().getCachedInventory().get(...)`, while writes still use `getInventory().insert/extract(...)`.
+- Grid node resolution now prefers `IActionHost#getActionableNode()` and only falls back to `getMainNode()` for older compatible runtimes.
+- Main-branch documentation now tracks the stable `1.21.1` line and the isolated `26.1.2` port line together, with explicit target-version and release-asset naming guidance.
+
+### Compatibility
+- Source-level review against `AE2-Lightning-Tech` `origin/port/26.1.2-neoforge` confirmed that the public `com.moakiee.ae2lt.api.event.LightningCollectedEvent` and `com.moakiee.ae2lt.api.frequency.*` contracts used by Thunderbolt_lib remain intact on the port line.
+- Source-level review also confirmed the continued presence of `NaturalLightningTransformationHandler#tryTransformFromNearbyLightningRod(ServerLevel, BlockPos, boolean)`, `LightningCollectorBlockEntity#captureLightning(boolean)`, `LightningKey`, `IActionSource.ofMachine(...)`, and the AE2 storage access path used by the runtime bridge.
+- Local validation passed with `./gradlew.bat clean build --no-daemon` in the isolated `Thunderbolt_lib_neoforge_26.1.2` directory, producing `build/libs/Thunderbolt_lib-1.0.10-alpha.26.1.2neoforge.jar`.
+
 ## [1.0.10] - 2026-05-20
 
 ### Added
@@ -173,6 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.10-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
 [1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
 [1.0.8]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.8
