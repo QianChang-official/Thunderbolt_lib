@@ -2,6 +2,31 @@
 
 This file tracks release-gate items that must survive across sessions.
 
+## 1.0.10 Release Gate
+
+Status: build validation passed; release unblocked for the AE2LT 1.0.9 / 1.0.10 alignment scope.
+
+This line tracks the AE2LT 1.0.9 / 1.0.10 wireless-frequency changes. Thunderbolt_lib
+keeps the public frequency bridge reflective, extends it with public menu-host / UI
+helpers, and does not hard-link AE2LT's public frequency contracts into the library's
+public method signatures.
+
+### Required Before 1.0.10 Version Bump
+
+- [x] Compare AE2LT `origin/main` after `1.0.7` and identify public API / wireless-frequency changes relevant to Thunderbolt_lib.
+- [x] Verify AE2LT's public `com.moakiee.ae2lt.api.frequency` package remains compatible through the `1.0.9` / `1.0.10` line.
+- [x] Add Thunderbolt_lib-side helpers for the public frequency menu-host / shared-screen surface without hard-linking AE2LT classes.
+- [x] Harden plugin discovery against duplicate `ServiceLoader` entries and malformed service metadata.
+- [x] Bump `mod_version`, `AE2LTCapabilities.API_VERSION`, `AE2LTVersion`, README target-version text, runtime metadata, and changelog entries to `1.0.10`.
+- [x] Run full Gradle `build` and confirm the release jar is produced.
+
+### Validation Notes
+
+- Validation scope: AE2LT source comparison against `origin/main`, Thunderbolt_lib `clean build`, repeat `build`, and release-jar inspection.
+- Reviewed AE2LT `origin/main` at `mod_version=1.0.10`; the public `com.moakiee.ae2lt.api.frequency` package added in `1.0.8` remains source-compatible, while most `1.0.9` / `1.0.10` work is internal wireless-connection logic.
+- Local validation passed with `./gradlew.bat clean build --no-daemon` and a repeat `./gradlew.bat build --no-daemon`; produced `build/libs/Thunderbolt_lib-1.0.10.jar`.
+- Runtime GameTest verification was not repeated for this release because the library change stays in reflective bridge code, metadata, and plugin bootstrap hardening; no collector-flow interception or capability registration logic changed.
+
 ## 1.0.8 Release Gate
 
 Status: build validation passed; release unblocked for the API alignment scope.

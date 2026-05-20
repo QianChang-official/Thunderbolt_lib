@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.fml.ModList;
@@ -136,6 +137,61 @@ public final class AE2LTAPI {
      */
     public boolean isAE2LTValidFrequency(MinecraftServer server, int frequencyId) {
         return AE2LTFrequencyApi.isValidFrequency(server, frequencyId);
+    }
+
+    /**
+     * Returns whether the given block entity implements AE2LT's public
+     * frequency-binding host API.
+     *
+     * @since 1.0.10
+     */
+    public boolean isAE2LTPublicFrequencyBindingHost(BlockEntity blockEntity) {
+        return AE2LTFrequencyApi.isPublicBindingHost(blockEntity);
+    }
+
+    /**
+     * Returns the public frequency-binding host's display translation key, if available.
+     *
+     * @since 1.0.10
+     */
+    public Optional<String> getAE2LTPublicFrequencyBindingDeviceName(BlockEntity blockEntity) {
+        return AE2LTFrequencyApi.getBindingDeviceName(blockEntity);
+    }
+
+    /**
+     * Returns whether the menu participates in AE2LT's shared frequency-binding UI.
+     *
+     * @since 1.0.10
+     */
+    public boolean isAE2LTPublicFrequencyMenuHost(AbstractContainerMenu menu) {
+        return AE2LTFrequencyApi.isPublicBindingMenuHost(menu);
+    }
+
+    /**
+     * Returns the bound block position advertised by AE2LT's public menu-host API.
+     *
+     * @since 1.0.10
+     */
+    public Optional<BlockPos> getAE2LTPublicFrequencyMenuBlockPos(AbstractContainerMenu menu) {
+        return AE2LTFrequencyApi.getBindingMenuBlockPos(menu);
+    }
+
+    /**
+     * Returns AE2LT's public menu verification token for the shared binding screen.
+     *
+     * @since 1.0.10
+     */
+    public OptionalInt getAE2LTPublicFrequencyMenuToken(AbstractContainerMenu menu) {
+        return AE2LTFrequencyApi.getBindingMenuToken(menu);
+    }
+
+    /**
+     * Requests AE2LT's shared public frequency-binding screen for a compatible menu.
+     *
+     * @since 1.0.10
+     */
+    public boolean openAE2LTPublicFrequencyBindingScreen(AbstractContainerMenu menu) {
+        return AE2LTFrequencyApi.openBindingScreen(menu);
     }
 
     /**

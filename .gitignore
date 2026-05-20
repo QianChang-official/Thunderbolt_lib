@@ -5,6 +5,7 @@ repo/
 
 # IDEs
 .idea/
+.eclipse/
 *.iml
 .classpath
 .project

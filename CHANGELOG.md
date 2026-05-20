@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-05-20
+
+### Added
+- `AE2LTFrequencyApi.FREQUENCY_API_PROVIDER_CLASS_NAME` and `AE2LTNativeBridge#frequencyApiProviderClassName()` for addons that need AE2LT's public frequency provider SPI name without hardcoding it.
+- `AE2LTFrequencyApi#isPublicBindingHost(BlockEntity)`, `getBindingDeviceName(BlockEntity)`, `isPublicBindingMenuHost(AbstractContainerMenu)`, `getBindingMenuBlockPos(AbstractContainerMenu)`, `getBindingMenuToken(AbstractContainerMenu)`, and `openBindingScreen(AbstractContainerMenu)`.
+- Matching `AE2LTAPI` facade methods for the new public binding-host and menu-host bridge helpers.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.10` to track the AE2LT 1.0.10 release line.
+- Runtime metadata now requires AE2LT `1.0.10+`.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.10` after checking the AE2LT 1.0.9 / 1.0.10 wireless-frequency line.
+- `PluginLoader` now guards against duplicate discovery runs, skips duplicate service entries, uses the framework class loader explicitly, and degrades cleanly when `ServiceLoader` encounters malformed service metadata.
+- README files now document the 1.0.10 target, the public frequency menu-host helpers, and the raised runtime dependency floor.
+
+### Compatibility
+- AE2LT 1.0.9 / 1.0.10 keep the public lightning capability/event contracts introduced earlier and remain compatible with Thunderbolt_lib's collector-event and capability bridges.
+- AE2LT's public frequency API package introduced in 1.0.8 remains source-compatible through 1.0.10; Thunderbolt_lib now mirrors the shared menu-host / UI entry points reflectively while continuing to fail closed if the runtime contract drifts.
+- The internal wireless-connection rewrites in AE2LT 1.0.9 / 1.0.10 were reviewed against Thunderbolt_lib's reflective query bridge; no additional hard-linked integration layer was required.
+
 ## [1.0.8] - 2026-05-16
 
 ### Added
@@ -154,6 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
 [1.0.8]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.8
 [1.0.6]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.6

@@ -3,6 +3,7 @@ package com.qianchang.ae2lt_api.api.frequency;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -12,12 +13,13 @@ import java.util.OptionalInt;
 import java.util.UUID;
 
 /**
- * Reflective read-only bridge for AE2LT 1.0.8's public wireless frequency API.
+ * Reflective bridge for AE2LT 1.0.8+'s public wireless frequency API.
  *
  * <p>AE2LT exposes these symbols under
  * {@code com.moakiee.ae2lt.api.frequency}. This wrapper keeps Thunderbolt_lib's
  * public signatures free of AE2LT classes while still letting addons query
- * frequency metadata when AE2LT 1.0.8+ is present.</p>
+ * frequency metadata, inspect public binding hosts / menus, and invoke the
+ * shared binding screen when AE2LT 1.0.8+ is present.</p>
  *
  * <p>All query methods fail closed: they return {@link Optional#empty()},
  * {@link OptionalInt#empty()}, or {@code false} if AE2LT is absent, older than
@@ -28,6 +30,8 @@ import java.util.UUID;
 public final class AE2LTFrequencyApi {
 
     public static final String FREQUENCY_API_CLASS_NAME = "com.moakiee.ae2lt.api.frequency.FrequencyApi";
+    public static final String FREQUENCY_API_PROVIDER_CLASS_NAME =
+            "com.moakiee.ae2lt.api.frequency.FrequencyApiProvider";
     public static final String FREQUENCY_INFO_CLASS_NAME = "com.moakiee.ae2lt.api.frequency.FrequencyInfo";
     public static final String TRANSMITTER_INFO_CLASS_NAME = "com.moakiee.ae2lt.api.frequency.TransmitterInfo";
     public static final String FREQUENCY_SECURITY_CLASS_NAME = "com.moakiee.ae2lt.api.frequency.FrequencySecurity";
@@ -126,6 +130,97 @@ public final class AE2LTFrequencyApi {
         }
     }
 
+    /** Returns whether the block entity implements AE2LT's public binding-host API. */
+    public static boolean isPublicBindingHost(BlockEntity blockEntity) {
+        Contract contract = contract();
+        return contract != null
+                && blockEntity != null
+                && contract.frequencyBindingHostClass.isInstance(blockEntity);
+    }
+
+    /** Returns the public binding host's display translation key, if available. */
+    public static Optional<String> getBindingDeviceName(BlockEntity blockEntity) {
+        if (blockEntity == null) {
+            return Optional.empty();
+        }
+        Contract contract = contract();
+        if (contract == null || !contract.frequencyBindingHostClass.isInstance(blockEntity)) {
+            return Optional.empty();
+        }
+        try {
+            Object value = contract.frequencyBindingDeviceName.invoke(blockEntity);
+            return value instanceof String name && !name.isBlank() ? Optional.of(name) : Optional.empty();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return Optional.empty();
+        }
+    }
+
+    /** Returns whether the menu implements AE2LT's public frequency menu-host API. */
+    public static boolean isPublicBindingMenuHost(AbstractContainerMenu menu) {
+        Contract contract = contract();
+        return contract != null
+                && menu != null
+                && contract.frequencyBindingMenuHostClass.isInstance(menu);
+    }
+
+    /** Returns the menu host's block position, if the menu participates in the shared AE2LT binding UI. */
+    public static Optional<BlockPos> getBindingMenuBlockPos(AbstractContainerMenu menu) {
+        if (menu == null) {
+            return Optional.empty();
+        }
+        Contract contract = contract();
+        if (contract == null || !contract.frequencyBindingMenuHostClass.isInstance(menu)) {
+            return Optional.empty();
+        }
+        try {
+            Object value = contract.frequencyBindingMenuBlockPos.invoke(menu);
+            return value instanceof BlockPos pos ? Optional.of(pos) : Optional.empty();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return Optional.empty();
+        }
+    }
+
+    /** Returns AE2LT's menu verification token for the shared binding screen flow. */
+    public static OptionalInt getBindingMenuToken(AbstractContainerMenu menu) {
+        if (menu == null) {
+            return OptionalInt.empty();
+        }
+        Contract contract = contract();
+        if (contract == null || !contract.frequencyBindingMenuHostClass.isInstance(menu)) {
+            return OptionalInt.empty();
+        }
+        try {
+            Object value = contract.frequencyBindingMenuToken.invoke(menu);
+            return value instanceof Integer token ? OptionalInt.of(token) : OptionalInt.empty();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * Requests AE2LT's shared frequency binding screen for a compatible menu.
+     *
+     * <p>This mirrors {@code FrequencyApi#openBindingScreen(AbstractContainerMenu)}
+     * but fails closed and returns {@code false} instead of throwing when AE2LT is
+     * absent, not initialised, or the menu does not implement the expected public
+     * contract.</p>
+     */
+    public static boolean openBindingScreen(AbstractContainerMenu menu) {
+        if (menu == null) {
+            return false;
+        }
+        Contract contract = contract();
+        if (contract == null || !contract.frequencyBindingMenuHostClass.isInstance(menu)) {
+            return false;
+        }
+        try {
+            contract.openBindingScreen.invoke(null, menu);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return false;
+        }
+    }
+
     private static Optional<AE2LTFrequencyInfo> mapFrequencyInfo(Contract contract, Object nativeInfo)
             throws ReflectiveOperationException {
         if (!contract.frequencyInfoClass.isInstance(nativeInfo)) {
@@ -168,12 +263,16 @@ public final class AE2LTFrequencyApi {
             Class<?> apiClass = Class.forName(FREQUENCY_API_CLASS_NAME, false, loader);
             Class<?> frequencyInfoClass = Class.forName(FREQUENCY_INFO_CLASS_NAME, false, loader);
             Class<?> transmitterInfoClass = Class.forName(TRANSMITTER_INFO_CLASS_NAME, false, loader);
+            Class<?> frequencyBindingHostClass = Class.forName(FREQUENCY_BINDING_HOST_CLASS_NAME, false, loader);
+            Class<?> frequencyBindingMenuHostClass =
+                    Class.forName(FREQUENCY_BINDING_MENU_HOST_CLASS_NAME, false, loader);
 
             return new Contract(
                     apiClass.getMethod("getBoundFrequencyId", BlockEntity.class),
                     apiClass.getMethod("getFrequencyInfo", MinecraftServer.class, int.class),
                     apiClass.getMethod("getTransmitter", MinecraftServer.class, int.class),
                     apiClass.getMethod("isValidFrequency", MinecraftServer.class, int.class),
+                    apiClass.getMethod("openBindingScreen", AbstractContainerMenu.class),
                     frequencyInfoClass,
                     frequencyInfoClass.getMethod("id"),
                     frequencyInfoClass.getMethod("name"),
@@ -183,7 +282,12 @@ public final class AE2LTFrequencyApi {
                     transmitterInfoClass,
                     transmitterInfoClass.getMethod("dimension"),
                     transmitterInfoClass.getMethod("pos"),
-                    transmitterInfoClass.getMethod("advanced"));
+                    transmitterInfoClass.getMethod("advanced"),
+                    frequencyBindingHostClass,
+                    frequencyBindingHostClass.getMethod("getFrequencyBindingDeviceName"),
+                    frequencyBindingMenuHostClass,
+                    frequencyBindingMenuHostClass.getMethod("getFrequencyBindingBlockPos"),
+                    frequencyBindingMenuHostClass.getMethod("getFrequencyBindingToken"));
         } catch (ReflectiveOperationException | LinkageError e) {
             return null;
         }
@@ -194,6 +298,7 @@ public final class AE2LTFrequencyApi {
             Method getFrequencyInfo,
             Method getTransmitter,
             Method isValidFrequency,
+            Method openBindingScreen,
             Class<?> frequencyInfoClass,
             Method frequencyInfoId,
             Method frequencyInfoName,
@@ -203,6 +308,11 @@ public final class AE2LTFrequencyApi {
             Class<?> transmitterInfoClass,
             Method transmitterInfoDimension,
             Method transmitterInfoPos,
-            Method transmitterInfoAdvanced) {
+            Method transmitterInfoAdvanced,
+            Class<?> frequencyBindingHostClass,
+            Method frequencyBindingDeviceName,
+            Class<?> frequencyBindingMenuHostClass,
+            Method frequencyBindingMenuBlockPos,
+            Method frequencyBindingMenuToken) {
     }
 }
