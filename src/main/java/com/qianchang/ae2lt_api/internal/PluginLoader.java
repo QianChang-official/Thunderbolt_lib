@@ -4,7 +4,7 @@ import com.qianchang.ae2lt_api.AE2LTAddonFramework;
 import com.qianchang.ae2lt_api.api.plugin.AE2LTApiContext;
 import com.qianchang.ae2lt_api.api.plugin.AE2LTPlugin;
 import com.qianchang.ae2lt_api.api.plugin.IAE2LTPlugin;
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 import java.util.ArrayList;
 import java.util.HashSet;

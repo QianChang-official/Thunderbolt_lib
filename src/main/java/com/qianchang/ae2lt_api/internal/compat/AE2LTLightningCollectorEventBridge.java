@@ -5,10 +5,10 @@ import com.qianchang.ae2lt_api.api.event.LightningCollectedEvent;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.ICancellableEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
@@ -43,7 +43,7 @@ final class AE2LTLightningCollectorEventBridge {
             // Registering this mirror late lets Thunderbolt_lib see the final
             // uncanceled AE2LT payload and write back library-side edits before
             // AE2LT inserts into the grid.
-            NeoForge.EVENT_BUS.addListener(
+            MinecraftForge.EVENT_BUS.addListener(
                 BRIDGE_PRIORITY,
                 false,
                 (Class) nativeEventClass,
@@ -95,11 +95,11 @@ final class AE2LTLightningCollectorEventBridge {
             long ehvAmount = tier == LightningEnergyTier.EXTREME_HIGH_VOLTAGE ? amount : 0L;
             LightningCollectedEvent mirroredEvent =
                     new LightningCollectedEvent(level, collectorPos, hvAmount, ehvAmount, naturalWeather);
-            NeoForge.EVENT_BUS.post(mirroredEvent);
+            MinecraftForge.EVENT_BUS.post(mirroredEvent);
 
             if (mirroredEvent.isCanceled()) {
-                if (nativeEvent instanceof ICancellableEvent cancellableEvent) {
-                    cancellableEvent.setCanceled(true);
+                if (nativeEvent.isCancelable()) {
+                    nativeEvent.setCanceled(true);
                 }
                 return;
             }
@@ -113,9 +113,9 @@ final class AE2LTLightningCollectorEventBridge {
     }
 
     private static BridgeContract resolveBridgeContract(Class<? extends Event> nativeEventClass) {
-        if (!ICancellableEvent.class.isAssignableFrom(nativeEventClass)) {
+        if (!nativeEventClass.isAnnotationPresent(Cancelable.class)) {
             throw new IllegalStateException(
-                    "AE2LT public LightningCollectedEvent no longer implements ICancellableEvent: "
+                    "AE2LT public LightningCollectedEvent is no longer marked @Cancelable: "
                             + nativeEventClass.getName());
         }
         return new BridgeContract(

@@ -57,13 +57,13 @@ public final class AE2LTNativeBridge {
     private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
 
     private static final ResourceLocation NATIVE_LIGHTNING_ENERGY_BLOCK_ID =
-            ResourceLocation.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY);
+            new ResourceLocation(nativeNamespace(), LIGHTNING_ENERGY);
     private static final ResourceLocation NATIVE_LIGHTNING_ENERGY_ITEM_ID =
-            ResourceLocation.fromNamespaceAndPath(nativeNamespace(), LIGHTNING_ENERGY_ITEM);
+            new ResourceLocation(nativeNamespace(), LIGHTNING_ENERGY_ITEM);
     private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_BLOCK_ID =
-            ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY);
+            new ResourceLocation(libraryNamespace(), LIGHTNING_ENERGY);
     private static final ResourceLocation LIBRARY_LIGHTNING_ENERGY_ITEM_ID =
-            ResourceLocation.fromNamespaceAndPath(libraryNamespace(), LIGHTNING_ENERGY_ITEM);
+            new ResourceLocation(libraryNamespace(), LIGHTNING_ENERGY_ITEM);
 
     private static volatile Boolean cachedNativeApiAvailability;
     private static volatile Boolean cachedFrequencyBindingAvailability;

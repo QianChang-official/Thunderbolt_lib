@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -32,11 +33,11 @@ final class AE2LTReflection {
     // grid-connected machines. Crystal Catalyzer runs on FE only, so it is
     // intentionally excluded. AE2LT 1.0.5 left this list unchanged.
     private static final List<ResourceLocation> BRIDGED_BLOCK_ENTITY_IDS = List.of(
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_collector"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_simulation_room"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "lightning_assembly_chamber"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "overload_processing_factory"),
-            ResourceLocation.fromNamespaceAndPath("ae2lt", "tesla_coil"));
+            new ResourceLocation("ae2lt", "lightning_collector"),
+            new ResourceLocation("ae2lt", "lightning_simulation_room"),
+            new ResourceLocation("ae2lt", "lightning_assembly_chamber"),
+            new ResourceLocation("ae2lt", "overload_processing_factory"),
+            new ResourceLocation("ae2lt", "tesla_coil"));
 
     /** Per-call-site cache for hot-path reflective method/field lookups. */
     private static final ConcurrentMap<MethodKey, Method> METHOD_CACHE = new ConcurrentHashMap<>();
@@ -66,6 +67,14 @@ final class AE2LTReflection {
 
     static List<ResourceLocation> bridgedBlockEntityIds() {
         return BRIDGED_BLOCK_ENTITY_IDS;
+    }
+
+    static boolean shouldAttachBridge(BlockEntity blockEntity) {
+        if (blockEntity == null) {
+            return false;
+        }
+        ResourceLocation key = ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(blockEntity.getType());
+        return key != null && BRIDGED_BLOCK_ENTITY_IDS.contains(key);
     }
 
     static boolean hasGrid(BlockEntity blockEntity) {

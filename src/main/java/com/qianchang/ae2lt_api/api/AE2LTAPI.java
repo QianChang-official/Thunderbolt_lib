@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -271,17 +271,18 @@ public final class AE2LTAPI {
      */
     public Optional<ILightningEnergyHandler> getLightningHandler(
             Level level, BlockPos pos, @Nullable Direction side) {
-        ILightningEnergyHandler handler =
-                level.getCapability(AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK, pos, side);
-        return Optional.ofNullable(handler);
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity == null) {
+            return Optional.empty();
+        }
+        return blockEntity.getCapability(AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK, side).resolve();
     }
 
     /**
      * Queries the lightning-energy item capability from an item stack.
      */
     public Optional<ILightningEnergyHandler> getLightningHandler(ItemStack stack) {
-        ILightningEnergyHandler handler = stack.getCapability(AE2LTCapabilities.LIGHTNING_ENERGY_ITEM);
-        return Optional.ofNullable(handler);
+        return stack.getCapability(AE2LTCapabilities.LIGHTNING_ENERGY_ITEM).resolve();
     }
 
     /**

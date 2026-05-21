@@ -1,8 +1,7 @@
 package com.qianchang.ae2lt_api.api.lightning;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.StringRepresentable;
 
 /**
@@ -36,16 +35,19 @@ public enum LightningEnergyTier implements StringRepresentable {
             StringRepresentable.fromEnum(LightningEnergyTier::values);
 
     /**
-     * Network {@link StreamCodec} for use in {@code CustomPacketPayload} or any
-     * other vanilla packet serialization. Encodes a single byte of ordinal data
-     * (matches AE2LT's own wire format so packets are interoperable).
+     * Writes / reads a single byte of ordinal data for packet serialization.
+     * This matches AE2LT's own wire format, so packets remain interoperable on
+     * the Forge 1.20.1 line.
      *
      * @since 1.0.3
      */
-    public static final StreamCodec<RegistryFriendlyByteBuf, LightningEnergyTier> STREAM_CODEC =
-            StreamCodec.of(
-                    (buf, tier) -> buf.writeByte(tier.ordinal()),
-                    buf -> fromOrdinal(buf.readByte()));
+    public static void writeToNetwork(FriendlyByteBuf buf, LightningEnergyTier tier) {
+        buf.writeByte(tier.ordinal());
+    }
+
+    public static LightningEnergyTier readFromNetwork(FriendlyByteBuf buf) {
+        return fromOrdinal(buf.readByte());
+    }
 
     private final String serializedName;
     private final String displayName;

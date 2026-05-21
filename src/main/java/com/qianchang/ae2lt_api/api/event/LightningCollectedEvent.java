@@ -3,11 +3,11 @@ package com.qianchang.ae2lt_api.api.event;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.ICancellableEvent;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
- * Fired on the NeoForge EVENT_BUS when Thunderbolt_lib mirrors AE2LT's public
+ * Fired on the Forge EVENT_BUS when Thunderbolt_lib mirrors AE2LT's public
  * collector capture event for addon consumers that target the library namespace.
  *
  * <p>This event is cancellable. Cancelling it prevents the energy from being
@@ -41,7 +41,8 @@ import net.neoforged.bus.api.ICancellableEvent;
  * The {@link #isNaturalWeather()} flag mirrors the same flag on AE2LT's
  * first-party event for parity.</p>
  */
-public class LightningCollectedEvent extends Event implements ICancellableEvent {
+@Cancelable
+public class LightningCollectedEvent extends Event {
 
     private final ServerLevel level;
     private final BlockPos collectorPos;

@@ -1,7 +1,9 @@
 plugins {
+    id 'eclipse'
+    id 'idea'
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.140'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
 }
 
 version = mod_version
@@ -11,36 +13,43 @@ base {
     archivesName = project.findProperty("artifact_name") ?: mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
 
-neoForge {
-    version = project.neo_version
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+    copyIdeResources = true
 
     runs {
-        client {
-            client()
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-        server {
-            server()
-            programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-        data {
-            data()
-            programArguments.addAll '--mod', project.mod_id, '--all',
-                '--output', file('src/generated/resources/').getAbsolutePath(),
-                '--existing', file('src/main/resources/').getAbsolutePath()
-        }
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
-    }
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
 
-    mods {
-        "${mod_id}" {
-            sourceSet(sourceSets.main)
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
     }
 }
@@ -51,47 +60,73 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = "https://www.cursemaven.com"
+        url = 'https://modmaven.dev/'
         content {
-            includeGroup "curse.maven"
+            includeGroup 'appeng'
+            includeGroup 'org.appliedenergistics'
+        }
+    }
+    maven {
+        url = 'https://www.cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
         }
     }
 }
 
 dependencies {
-    // AE2 — publicly available on CurseForge maven
-    compileOnly "curse.maven:applied-energistics-2-223794:7027323"
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // AE2 Lightning Tech — place the ae2lt jar in the libs/ folder for development builds.
-    // Download from: https://github.com/MOAKIEE/AE2-Lightning-Tech/releases
-    // This dependency is NOT needed at compile time for the pure API surface; it is only
-    // required to build the internal integration helpers in the `internal` package.
+    compileOnly fg.deobf("appeng:appliedenergistics2-forge:${ae2_version}")
+
     if (project.file('libs').exists() && !fileTree(dir: 'libs', include: '*.jar').isEmpty()) {
         compileOnly fileTree(dir: 'libs', include: '*.jar')
     }
 }
 
-var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
-        minecraft_version      : minecraft_version,
-        minecraft_version_range: minecraft_version_range,
-        neo_version            : neo_version,
-        neo_version_range      : neo_version_range,
-        loader_version_range   : loader_version_range,
-        mod_id                 : mod_id,
-        mod_name               : mod_name,
-        mod_license            : mod_license,
-        mod_version            : mod_version,
-        mod_authors            : mod_authors,
-        mod_description        : mod_description]
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+            ae2_version            : ae2_version,
+            ae2lt_version_range    : ae2lt_version_range,
+    ]
+
     inputs.properties replaceProperties
-    expand replaceProperties
-    from "src/main/templates"
-    into "build/generated/sources/modMetadata"
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
 }
 
-sourceSets.main.resources.srcDir generateModMetadata
-neoForge.ideSyncTask generateModMetadata
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    finalizedBy 'reobfJar'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
 
 publishing {
     publications {
