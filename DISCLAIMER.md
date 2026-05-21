@@ -2,6 +2,8 @@
 
 This project name is used only for community development, learning, testing, and other non-commercial purposes.
 
+Branch names, release notes, and public asset filenames in this repository are community packaging metadata only; the runtime mod id remains `ae2lt_api` for compatibility.
+
 If the current name, wording, or presentation is considered infringing or inappropriate by any rights holder, please contact the maintainer. The name and related presentation will be changed promptly after notice.
 
 本项目名称仅用于社区开发、学习、测试等非商业用途。

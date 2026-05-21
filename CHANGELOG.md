@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10-1.20.1forge] - 2026-05-21
+
+### Added
+- Dedicated Forge `1.20.1` worktree / release branch for Thunderbolt_lib, targeting AE2LT `1.0.10-1.20.1forge`.
+- Forge `mods.toml` metadata and normalized public release asset name `Thunderbolt_lib_1.20.1_forge_1.0.10.jar`.
+
+### Changed
+- Migrated the build from NeoForge moddev to ForgeGradle `6.x`, Java `17`, official `1.20.1` mappings, and Forge `47.4.20`.
+- Reworked capability integration to Forge `Capability` / `LazyOptional` semantics, including `AttachCapabilitiesEvent<BlockEntity>` provider attachment for AE2LT machines.
+- Adapted `AE2LTAPI`, `AE2LTNativeBridge`, `LightningEnergyTier`, and related helpers to the Forge `1.20.1` runtime surface.
+- Refreshed repository Markdown docs so this worktree, the branch naming, and the unified `v1.0.10` release asset set all document the Forge port correctly.
+
+### Fixed
+- `AE2LTReflection.shouldAttachBridge()` now resolves block-entity types through `ForgeRegistries.BLOCK_ENTITY_TYPES`, avoiding the Forge runtime remapping failure previously triggered by `BuiltInRegistries.BLOCK_ENTITY_TYPE` during combined launches.
+
+### Validation
+- Local `./gradlew.bat clean build --no-daemon` for `Thunderbolt_lib_forge_1.20.1` produces `build/libs/Thunderbolt_lib-1.0.10-1.20.1forge.jar`.
+- GitHub release `v1.0.10` is intended to carry the Forge `1.20.1`, NeoForge `1.21.1`, and NeoForge `26.1.2` artifacts together under normalized public filenames.
+
 ## [1.0.10-alpha.26.1.2neoforge] - 2026-05-20
 
 ### Added
@@ -192,6 +211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.10-1.20.1forge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/release/forge-1.20.1-v1.0.10
 [1.0.10-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
 [1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
