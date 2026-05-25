@@ -1,173 +1,288 @@
-# Thunderbolt_lib
+# Thunderbolt_lib（闪枢库）
 
-[中文文档](README_zh_CN.md)
+[English](README_en.md)
 
-`Thunderbolt_lib` is the addon API and runtime bridge library for [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech).
+Thunderbolt_lib 是 [AE2 Lightning Tech](https://github.com/MOAKIEE/AE2-Lightning-Tech) 的 addon API 前置库与运行时桥接层，用于为下游模组提供稳定、低耦合、尽量向后兼容的 AE2LT 接入面。
 
-> Runtime mod id remains `ae2lt_api`.
-> Stable line: AE2 Lightning Tech `1.0.10`, Minecraft `1.21.1`, NeoForge `21.1.x`, Java `21`.
-> Port line: AE2 Lightning Tech `1.0.0alpha-26.1.2neoforge`, Minecraft `26.1.2`, NeoForge `26.1.2.21-beta`, Java `25`.
-> Unified release asset naming: `Thunderbolt_lib_<minecraft>_<loader>_<ae2lt-target>.jar`.
-> Latest stable release: **1.0.10**. Companion port build: **1.0.10-alpha.26.1.2neoforge** on branch `Minecraft26.1.2neoforge`.
+本库本身不负责扩展 AE2LT 的游戏内容；它提供的是能力接口、事件镜像、配方构建器、运行时桥接、版本探测与插件入口，使 addon 可以在不硬依赖 AE2LT 内部实现细节的前提下接入闪电能量网络与相关系统。
 
-## Release Matrix
+> 运行时 `mod_id` 固定为 `ae2lt_api`
+>
+> Thunderbolt_lib 与 AE2LT 主模组 `ae2lt` 刻意保持不同命名空间
+>
+> README / Markdown 文档以后只在 `main` 分支维护
 
-| Line | Thunderbolt_lib version | Branch | Target AE2LT | Minecraft | Loader | Java | Public release asset |
-|------|--------------------------|--------|--------------|-----------|--------|------|----------------------|
-| Stable | `1.0.10` | `main` | `1.0.10` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.10.jar` |
-| Port | `1.0.10-alpha.26.1.2neoforge` | `Minecraft26.1.2neoforge` | `1.0.0alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha-26.1.2neoforge.jar` |
+## 项目定位
 
-## Upstream Tracking
+Thunderbolt_lib 与 AE2LT / AE2 的关系如下：
 
-This project is maintained against three upstream repositories:
+- **Thunderbolt_lib**：面向 addon 的稳定 API 与运行时桥接层
+- **AE2 Lightning Tech**：实际提供闪电能量机器、配方、频率系统与 first-party API 的主模组
+- **Applied Energistics 2**：AE2LT 的核心依赖，上层网格与部分运行时合同来源
 
-- AE2 upstream: <https://github.com/AppliedEnergistics/Applied-Energistics-2>
-- AE2 Lightning Tech upstream: <https://github.com/MOAKIEE/AE2-Lightning-Tech>
-- Thunderbolt_lib upstream: <https://github.com/QianChang-official/Thunderbolt_lib>
+Thunderbolt_lib 持续保留自己的 Java 包与命名空间：
 
-Validation snapshot for this document refresh (`2026-05-20`):
+| 项目 | Thunderbolt_lib | AE2LT first-party API |
+|---|---|---|
+| Java 包 | `com.qianchang.ae2lt_api.api.*` | `com.moakiee.ae2lt.api.*` |
+| 命名空间 | `ae2lt_api` | `ae2lt` |
+| 运行时 mod id | `ae2lt_api` | `ae2lt` |
+| 主要用途 | addon 稳定桥接层 | 主模组原生 API |
 
-- Local `AE2-Lightning-Tech` `main` was behind `origin/main` by 24 commits and was fast-forwarded before this rewrite.
-- Local `AE2-Lightning-Tech` port worktree matches `origin/port/26.1.2-neoforge` at `1.0.0alpha-26.1.2neoforge`.
-- Local `Thunderbolt_lib` `main` and `Minecraft26.1.2neoforge` are in sync with `origin`.
-- `Applied-Energistics-2` was cloned locally for API/runtime contract review against current upstream `main`.
+## 当前维护线
 
-## What It Provides
+| 维护线 | 本地仓库 / 分支 | Thunderbolt_lib 版本 | 对齐 AE2LT | Minecraft | Loader | Java | 当前公开资产 |
+|---|---|---|---|---|---|---|---|
+| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.10` | `1.0.10-1.20.1forge` | `1.0.10-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.10.jar` |
+| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.11` | `1.0.11` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.11.jar` |
+| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.10-alpha.26.1.2neoforge` | `1.0.0alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar` |
 
-- Lightning energy capability API: `ILightningEnergyHandler`
-- Runtime bridge for AE2LT lightning-connected machines (5 grid-connected block entities; see below)
-- Collector capture mirror event: `LightningCollectedEvent` (with `isNaturalWeather()` since 1.0.3)
-- Recipe builders for current AE2LT machine and ritual recipe ids
-- Plugin loading via `@AE2LTPlugin`, `IAE2LTPlugin`, and `ServiceLoader`
-- Static helper facade: `AE2LTAPI`
-- Frozen ID constants: `AE2LTBlockEntityIds`, `AE2LTRecipeIds` (since 1.0.3)
-- Codec helpers: `LightningEnergyTier.CODEC` / `STREAM_CODEC` (since 1.0.3)
-- Native API detection: `AE2LTNativeBridge` (since 1.0.3)
-- Version helpers: `AE2LTVersion` and `AE2LTAPI#getLoadedAE2LTVersion()` (since 1.0.4)
-- First-party naming aliases on `ILightningEnergyHandler` and `LightningEnergyTier` (since 1.0.4)
-- Frequency-binding detection: `AE2LTNativeBridge#isFrequencyBindingAvailable()` and `AE2LTAPI#isAE2LTFrequencyBindingAvailable()` (since 1.0.5)
-- Frequency-binding host helpers: `AE2LTFrequencyBinding` plus `AE2LTAPI` facade methods for reading/writing host frequency ids, connection state, and grid channel counts (since 1.0.6)
-- AE2LT 1.0.8+ public frequency API bridge: `AE2LTFrequencyApi`, `AE2LTFrequencyInfo`, `AE2LTTransmitterInfo`, `AE2LTFrequencySecurity`, plus `AE2LTAPI` facade methods for bound-frequency, metadata, transmitter, validity, public binding-host inspection, public menu-host inspection, and shared binding-screen requests (query surface since 1.0.8; expanded bridge helpers in 1.0.10)
+## 最新推荐下载
 
-## Runtime Bridge Coverage
+- **需要 NeoForge 1.21.1 主线**：使用 `Thunderbolt_lib_1.21.1_neoforge_1.0.11.jar`
+- **需要 Forge 1.20.1 维护线**：从 **Thunderbolt_lib 1.0.10 Unified Release** 获取 `Thunderbolt_lib_1.20.1_forge_1.0.10.jar`
+- **需要 NeoForge 26.1.2 维护线**：从 **Thunderbolt_lib 1.0.10 Unified Release** 获取 `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar`
 
-`AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK` is wired onto the five grid-connected machines that AE2LT 1.0.2+ publicly exposes:
+这三条线同时维护，但**不是每次 Release 都会重新上传全部维护线资产**。
 
-| Block entity id | Role |
-|-----------------|------|
-| `ae2lt:lightning_collector` | Collects natural / artificial lightning |
-| `ae2lt:lightning_simulation_room` | Simulates lightning strikes for crafting |
-| `ae2lt:lightning_assembly_chamber` | Assembles items from lightning + inputs |
-| `ae2lt:overload_processing_factory` | Heavy-duty lightning processing |
-| `ae2lt:tesla_coil` | Discharges lightning energy |
+## Release asset 命名规则
 
-`ae2lt:crystal_catalyzer` runs on FE only and is intentionally excluded from the lightning-energy bridge.
+公开 jar 命名固定为：
 
-The same five IDs are exposed as `AE2LTBlockEntityIds.LIGHTNING_GRID_MEMBERS` (and individually as `LIGHTNING_COLLECTOR`, etc.) for addon code that wants to iterate or query without hardcoding strings.
+```text
+Thunderbolt_lib_<minecraft版本号>_<forge还是neoforge>_<要对齐的AE2LT版本号名称>.jar
+```
 
-## Relationship to AE2LT's First-Party API
+示例：
 
-AE2LT 1.0.2+ introduced its own first-party API package `com.moakiee.ae2lt.api` under the `ae2lt` namespace. Thunderbolt_lib keeps the existing namespace split across both the stable `1.21.1` line and the isolated `26.1.2` port line. The stable `1.0.10` release verifies compatibility through the AE2LT 1.0.9 / 1.0.10 wireless-frequency changes, while the `1.0.10-alpha.26.1.2neoforge` branch carries those same addon-facing contracts forward into the high-version port and adds extra fail-closed runtime guards around AE2 / AE2LT grid integration. The two namespaces remain deliberately distinct:
+```text
+Thunderbolt_lib_1.20.1_forge_1.0.10.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.11.jar
+Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar
+```
 
-| | Library (this repo) | AE2LT first-party |
-|--|---------------------|-------------------|
-| Java package | `com.qianchang.ae2lt_api.api.*` | `com.moakiee.ae2lt.api.*` |
-| Namespace | `ae2lt_api` | `ae2lt` |
-| Capability id | `ae2lt_api:lightning_energy` | `ae2lt:lightning_energy` |
-| Tier enum | `LightningEnergyTier` | `LightningTier` |
-| Recipe builders | yes | no |
-| Plugin loader | yes | no |
-| Runtime without AE2LT loaded | no; metadata requires the matching AE2LT target for the line you build | no |
+特别规则：
 
-For most addons, the library remains the right choice: it exposes recipe builders, plugin loading, version helpers, and a byte-stable API surface across Thunderbolt_lib releases. Use `AE2LTNativeBridge.isNativeApiAvailable()` to detect whether AE2LT's first-party API is loaded at runtime, and `AE2LTVersion` when you need version gates.
+- 如果内部 AE2LT target 是 `1.0.0alpha-26.1.2neoforge`
+- 对外公开资产名必须是 `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar`
+- 不要写成 `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha-26.1.2neoforge.jar`
 
-`LightningCollectedEvent` now mirrors AE2LT's own public collector event instead of taking over lightning-entity ticks. Library listeners still receive a cancellable event with HV/EHV convenience accessors, and any cancellation or active-tier amount rewrite is synchronized back onto AE2LT's public event before the collector inserts into the grid.
+## Release 策略
 
-AE2LT 1.0.8 adds `com.moakiee.ae2lt.api.frequency.FrequencyApi`. Thunderbolt_lib mirrors its public query surface through `AE2LTFrequencyApi` without putting AE2LT classes in public method signatures. Addons can query bound frequency ids, frequency metadata, transmitter locations, current validity, public binding-host display names, public menu-host block positions/tokens, and can request AE2LT's shared binding screen through the static helper or the `AE2LTAPI` facade. The provider SPI and public host/access/menu contracts are still surfaced as class-name constants so advanced integrations can decide when they want to compile directly against AE2LT's first-party API jar.
+Thunderbolt_lib 有多条维护线，但发布时遵循“**只上传本轮实际变化的维护线**”原则：
 
-If that compatibility mirror cannot initialize because AE2LT's public event contract is missing or has drifted, Thunderbolt_lib now fails closed: the library-side `LightningCollectedEvent` will stop firing, but the reflective block-entity capability bridge, recipe builders, and plugin/bootstrap surface remain available. On the `26.1.2` port branch, the high-version grid bridge also performs a startup contract preflight and refuses to register when the verified AppEng / AE2LT runtime contract is missing. This project still declares AE2LT as a required runtime dependency, so "Thunderbolt_lib without AE2LT" is not a supported player install state.
+- 只有本轮代码、版本号、AE2LT target、问题修复或构建产物发生变化的维护线，才进入本次 Release
+- 未变化的维护线继续从之前对应的 Release 获取
+- 不要因为维护线仍然存在，就把旧资产复制到新 tag
+- 不要因为本地重新构建过，就默认重新上传旧版本线
 
-## Runtime Naming
+也就是说：
 
-- Git repository / project name: `Thunderbolt_lib`
-- Internal build outputs: `Thunderbolt_lib-1.0.10.jar` (`main`) and `Thunderbolt_lib-1.0.10-alpha.26.1.2neoforge.jar` (`Minecraft26.1.2neoforge`)
-- Public release assets: `Thunderbolt_lib_1.21.1_neoforge_1.0.10.jar` and `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha-26.1.2neoforge.jar`
-- Runtime mod id: `ae2lt_api`
+- `v1.0.11` 只代表本轮更新的 NeoForge 1.21.1 主线
+- Forge 1.20.1 与 NeoForge 26.1.2 的现有可用资产继续从 `v1.0.10` 获取
 
-Keeping `mod_id = ae2lt_api` avoids breaking existing addon dependency declarations in `neoforge.mods.toml` and capability lookups.
+## 三条维护线说明
 
-## Current Recipe Coverage
+### Forge 1.20.1
 
-| Builder | Recipe type | Notes |
-|---------|-------------|-------|
-| `LightningAssemblyRecipeBuilder` | `ae2lt:lightning_assembly` | Multi-input + lightning tier + total energy |
-| `LightningTransformRecipeBuilder` | `ae2lt:lightning_transform` | Simple input → result |
-| `LightningSimulationRecipeBuilder` | `ae2lt:lightning_simulation` | Multi-input + lightning tier + total energy |
-| `OverloadProcessingRecipeBuilder` | `ae2lt:overload_processing` | Items + optional input fluid + multi-result |
-| `CrystalCatalyzerRecipeBuilder` | `ae2lt:crystal_catalyzer` | Catalyst slot, item or tag output, supports `dust` mode |
-| `LightningStrikeRecipeBuilder` | `ae2lt:lightning_strike` | Multi-block ritual triggered by lightning |
+这条线把 Thunderbolt_lib 的 loader 适配回 Forge 1.20.1，保留相同 addon-facing API，同时把运行时桥接改成 Forge 侧实现：
 
-`CrystalCatalyzerRecipeBuilder` aligns with AE2LT 1.0.2's `crystal_catalyzer/dust/*.json` files: call `dustMode()` (or `mode("dust")`) plus `outputTag(tagId, count)` to emit a tag-resolved output stack.
+- Forge capability token 与 `LazyOptional`
+- `AttachCapabilitiesEvent<BlockEntity>` 动态附加 provider
+- Forge 事件总线 collector-event mirror
+- `FriendlyByteBuf` 序列化辅助
 
-## Dependency Example
+### NeoForge 1.21.1
+
+这是当前默认维护主线，也是 README 权威入口所在分支：
+
+- 当前版本 `1.0.11`
+- 对齐 AE2LT `1.0.11`
+- 新增对 AE2LT 公共 `PatternProviderUiProfile` 的反射桥接
+- 继续维护公共频率桥、Collector event mirror、配方构建器与运行时桥接元数据
+
+### NeoForge 26.1.2
+
+这条线用于高版本移植与合同收敛：
+
+- 当前版本 `1.0.10-alpha.26.1.2neoforge`
+- 对齐 AE2LT `1.0.0alpha-26.1.2neoforge`
+- 高版本 AE2 / AE2LT / AppEng 交互保持反射化
+- 启动期执行合同预检，运行时桥接在合同漂移时 fail-closed
+
+## 安装与依赖说明
+
+Thunderbolt_lib 在运行时仍要求目标维护线对应的 AE2LT 主模组存在。
+
+对于 addon 模组，建议在 `mods.toml` / `neoforge.mods.toml` 中同时声明：
+
+- `ae2lt_api`：Thunderbolt_lib 公共 API
+- `ae2lt`：AE2 Lightning Tech 主模组
+
+### NeoForge 示例
 
 ```toml
-[[dependencies.your_mod_id]]
+[[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.10,)"
+    versionRange = "[1.0.11,)"
     ordering = "AFTER"
     side = "BOTH"
 
-[[dependencies.your_mod_id]]
+[[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.10,)"
+    versionRange = "[1.0.11,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
 
-## Build Output
+### Forge 1.20.1 示例
 
-```bash
-./gradlew build
+```toml
+[[dependencies.yourmodid]]
+    modId = "ae2lt_api"
+    mandatory = true
+    versionRange = "[1.0.10-1.20.1forge,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.yourmodid]]
+    modId = "ae2lt"
+    mandatory = true
+    versionRange = "[1.0.10-1.20.1forge,)"
+    ordering = "AFTER"
+    side = "BOTH"
 ```
 
-```text
-main/build/libs/Thunderbolt_lib-1.0.10.jar
-Minecraft26.1.2neoforge/build/libs/Thunderbolt_lib-1.0.10-alpha.26.1.2neoforge.jar
+如果你面向 `26.1.2` 维护线开发，请把下限改成：
+
+```toml
+[[dependencies.yourmodid]]
+    modId = "ae2lt_api"
+    type = "required"
+    versionRange = "[1.0.10-alpha.26.1.2neoforge,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.yourmodid]]
+    modId = "ae2lt"
+    type = "required"
+    versionRange = "[1.0.0alpha-26.1.2neoforge,)"
+    ordering = "AFTER"
+    side = "BOTH"
 ```
 
-Recommended public release asset names:
+## 开发者接入说明
 
-```text
-Thunderbolt_lib_1.21.1_neoforge_1.0.10.jar
-Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha-26.1.2neoforge.jar
-```
+下游 addon 通常通过 Thunderbolt_lib，而不是直接面向 AE2LT first-party API 开发，原因是：
 
-## Versioning
+- 提供更稳定的 addon-facing 公共面
+- 提供 recipe builder、plugin loader、版本探测与运行时桥接门面
+- 尽量把 AE2LT 内部结构变化封装在反射桥接层内
 
-This project tracks AE2 Lightning Tech's release line. See [CHANGELOG.md](CHANGELOG.md) for per-version notes.
+常见入口：
 
-### Stable line — Minecraft 1.21.1 / NeoForge 21.1.x / AE2LT 1.0.x
+- `AE2LTAPI`
+- `AE2LTCapabilities`
+- `AE2LTNativeBridge`
+- `AE2LTVersion`
+- `AE2LTFrequencyApi`
+- `AE2LTFrequencyBinding`
+- `@AE2LTPlugin` / `IAE2LTPlugin`
 
-- `1.0.10` — tracks AE2LT `1.0.10`, verifies the AE2LT `1.0.9` / `1.0.10` wireless-frequency line, adds reflective helpers for public frequency binding hosts / menus plus a fail-closed shared binding-screen request bridge, and hardens plugin discovery against duplicate or malformed service entries.
-- `1.0.8` — tracks AE2LT `1.0.8` and adds a reflective bridge for the new public wireless frequency API: bound-frequency id lookup, frequency metadata snapshots, transmitter location snapshots, validity checks, and class-name constants for the public binding/UI contracts.
-- `1.0.7` — tracks AE2LT `1.0.7` and ships the collector-event compatibility hotfix: Thunderbolt_lib now mirrors AE2LT's public `LightningCollectedEvent`, keeps cancellation/amount rewrites inside AE2LT's native collector flow, and records runtime verification scope as GameTest integration validation + client startup compatibility + log scanning.
-- `1.0.6` — tracks AE2LT `1.0.6`. AE2LT's public API package and recipe schemas are unchanged, while its frequency-binding subsystem now applies to more machines; this release adds reflective frequency host helpers while preserving existing symbols.
-- `1.0.5` — tracks AE2LT `1.0.5`. AE2LT's public API package and recipe schemas are unchanged from `1.0.4`; this release adds frequency-binding detection helpers and caches hot-path reflective lookups while preserving existing symbols.
-- `1.0.4` — tracks AE2LT `1.0.4`. AE2LT's public API package and recipe schemas are unchanged from `1.0.3`; this release adds version helpers, capability-id helpers, and first-party naming aliases while preserving existing symbols.
-- `1.0.3` — adds frozen ID constants, Mojang/Stream codecs on the tier enum, native-API detection bridge, and a `naturalWeather` flag on `LightningCollectedEvent`. Aligns with AE2LT `1.0.3`'s first-party API package.
-- `1.0.2` — bumps version to track the AE2LT `1.0.2` release line; content is functionally identical to `1.0.1`.
-- `1.0.1` — reconciles API with AE2LT `1.0.2` recipe schemas (Crystal Catalyzer dust mode + tag output, corrected 5-BE bridge list).
-- `1.0.0` — initial Thunderbolt_lib release, aligned with AE2LT `1.0.0`.
+## API 概览
 
-### Port line — Minecraft 26.1.2 / NeoForge 26.1.2.21-beta / AE2LT 1.0.0alpha-26.1.2neoforge
+### Lightning energy capability
 
-- `1.0.10-alpha.26.1.2neoforge` — isolated migration branch for the AE2LT `26.1.2` NeoForge port. Upgrades the toolchain to JDK 25 / Gradle 9, migrates identifier usage to the new `net.minecraft.resources.Identifier` API, removes the remaining direct AppEng compile-time dependency by making grid interaction fully reflective, aligns grid reads with AE2LT's `GridLightningEnergyHandler`, and adds startup contract preflight so capability bridging fails closed on incompatible high-version AE2 / AE2LT runtimes.
+- `ILightningEnergyHandler`
+- `AE2LTCapabilities.LIGHTNING_ENERGY_BLOCK`
+- `AE2LTCapabilities.LIGHTNING_ENERGY_ITEM`
+- `LightningEnergyTier`
 
-## Disclaimer
+### Runtime bridge / native contract helpers
 
-This name is used for non-commercial community purposes only. If the name is considered infringing or unsuitable by any rights holder, contact the maintainer and it will be changed promptly.
+- `AE2LTNativeBridge`
+- `AE2LTVersion`
+- `AE2LTBlockEntityIds`
+- `AE2LTRecipeIds`
 
-Full notice: [DISCLAIMER.md](DISCLAIMER.md)
+### Frequency APIs
+
+- `AE2LTFrequencyBinding`
+- `AE2LTFrequencyApi`
+- `AE2LTFrequencyInfo`
+- `AE2LTTransmitterInfo`
+- `AE2LTFrequencySecurity`
+
+### Pattern provider bridge
+
+在 NeoForge 1.21.1 主线上，`AE2LTPatternProviderApi` 与 `AE2LTPatternProviderUiProfileInfo` 反射桥接 AE2LT `1.0.11` 公共 `PatternProviderUiProfile`。
+
+### Recipe builders
+
+- `LightningAssemblyRecipeBuilder`
+- `LightningTransformRecipeBuilder`
+- `LightningSimulationRecipeBuilder`
+- `OverloadProcessingRecipeBuilder`
+- `CrystalCatalyzerRecipeBuilder`
+- `LightningStrikeRecipeBuilder`
+
+### Events and plugin entrypoints
+
+- `LightningCollectedEvent`
+- `AE2LTAPI`
+- `@AE2LTPlugin`
+- `IAE2LTPlugin`
+
+## 运行时桥接与 graceful degrade
+
+Thunderbolt_lib 的设计目标之一是把运行时耦合控制在桥接层内：
+
+- 当 AE2LT 公开事件合同缺失或漂移时，collector mirror event 会 fail-closed
+- 当高版本 AE2 / AE2LT / AppEng 网格合同不满足时，相关 capability bridge 会停用，而不是半坏运行
+- 反射式桥接失效时，其它不依赖该合同的公共面仍尽量保持可用
+
+但需要注意：
+
+- **这不代表“只装 Thunderbolt_lib 不装 AE2LT”是受支持的玩家安装形态**
+- Thunderbolt_lib 仍然把 AE2LT 作为对应维护线的运行时依赖
+
+## 已知限制
+
+- 维护线之间的内部 `mod_version` 与公开发布资产名不一定完全相同，公开下载请以 Release asset 名为准
+- `ae2lt:crystal_catalyzer` 走 FE，不在闪电能量 capability bridge 覆盖范围内
+- 高版本移植线存在更多运行时合同风险，因此其桥接策略比稳定线更严格
+
+## 版本兼容策略
+
+- Thunderbolt_lib 跟随 AE2LT 维护线演进，但尽量保持 addon-facing API 稳定
+- 能以反射桥接处理的兼容变化，优先不把 AE2LT 类型暴露进 Thunderbolt_lib 公共签名
+- 需要版本门槛时，通过 `AE2LTVersion` 与对应 bridge 的 runtime availability 检查做 feature gate
+- 新增维护线或发布策略变更时，只更新 `main` 分支文档，不再把版本分支 README 当作长期入口
+
+## 文档维护策略
+
+从现在开始：
+
+- README / Markdown 文档只在 `main` 分支维护
+- `README.md` 是中文主文档，也是 GitHub 仓库首页默认显示入口
+- `README_en.md` 是英文文档
+- `README_zh_CN.md` 只保留为兼容跳转入口
+- `Minecraft26.1.2neoforge` 与 `release/forge-1.20.1-v1.0.10` 分支中的 README 不再作为权威文档入口
+
+如果你需要查看：
+
+- 安装说明
+- 兼容矩阵
+- Release asset 命名规则
+- 维护线状态
+- API 文档入口
+
+请始终以 `main` 分支 README 为准。
+
+## 许可证 / 免责声明
+
+- **代码许可证**：MIT License
+- **项目说明与名称声明**：见 [DISCLAIMER.md](DISCLAIMER.md)
+- **版本记录**：见 [CHANGELOG.md](CHANGELOG.md)
