@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.11] - 2026-05-25
+
+### Added
+- `com.qianchang.ae2lt_api.api.pattern.AE2LTPatternProviderApi` — reflective read-only bridge for AE2LT 1.0.11's public `com.moakiee.ae2lt.api.pattern.PatternProviderUiProfile`.
+- Immutable library-side snapshot `AE2LTPatternProviderUiProfileInfo`.
+- `AE2LTNativeBridge#isPatternProviderUiProfileAvailable()` and `patternProviderUiProfileClassName()`.
+- `AE2LTAPI#isAE2LTPatternProviderUiProfileAvailable()`, `isAE2LTPatternProviderUiProfileHost(BlockEntity)`, and `getAE2LTPatternProviderUiProfile(BlockEntity)`.
+- `AE2LTVersion#PATTERN_PROVIDER_UI_PROFILE_INTRODUCED_VERSION` and `isLoadedAE2LTAtLeastPatternProviderUiProfile()`.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.11` to track the AE2LT 1.0.11 release line.
+- Runtime metadata now requires AE2LT `1.0.11+`.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.11` after checking the new public overloaded pattern-provider UI profile contract.
+
+### Compatibility
+- AE2LT 1.0.11 keeps the public lightning capability/event and wireless frequency contracts compatible with 1.0.10.
+- The new pattern-provider UI profile bridge is reflective and fails closed when AE2LT is absent, older than 1.0.11, not initialized yet, or if the runtime contract drifts.
+
 ## [1.0.10-alpha.26.1.2neoforge] - 2026-05-20
 
 ### Added
@@ -193,6 +211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
 [1.0.10-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
+[1.0.11]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.11
 [1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
 [1.0.8]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.8
