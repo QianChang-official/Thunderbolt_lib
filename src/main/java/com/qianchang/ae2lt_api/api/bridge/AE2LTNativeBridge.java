@@ -3,6 +3,7 @@ package com.qianchang.ae2lt_api.api.bridge;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyBinding;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyApi;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
+import com.qianchang.ae2lt_api.api.pattern.AE2LTPatternProviderApi;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -52,6 +53,8 @@ public final class AE2LTNativeBridge {
             AE2LTFrequencyApi.FREQUENCY_BINDING_ACCESS_CLASS_NAME;
     private static final String PUBLIC_FREQUENCY_BINDING_MENU_HOST_CLASS =
             AE2LTFrequencyApi.FREQUENCY_BINDING_MENU_HOST_CLASS_NAME;
+    private static final String PATTERN_PROVIDER_UI_PROFILE_CLASS =
+            AE2LTPatternProviderApi.PATTERN_PROVIDER_UI_PROFILE_CLASS_NAME;
     private static final String WIRELESS_FREQUENCY_MANAGER_CLASS = "com.moakiee.ae2lt.grid.WirelessFrequencyManager";
     private static final String LIGHTNING_ENERGY = "lightning_energy";
     private static final String LIGHTNING_ENERGY_ITEM = "lightning_energy_item";
@@ -68,6 +71,7 @@ public final class AE2LTNativeBridge {
     private static volatile Boolean cachedNativeApiAvailability;
     private static volatile Boolean cachedFrequencyBindingAvailability;
     private static volatile Boolean cachedFrequencyApiAvailability;
+    private static volatile Boolean cachedPatternProviderUiProfileAvailability;
 
     private AE2LTNativeBridge() {
     }
@@ -125,6 +129,22 @@ public final class AE2LTNativeBridge {
         }
         boolean available = classExists(PUBLIC_FREQUENCY_API_CLASS);
         cachedFrequencyApiAvailability = available;
+        return available;
+    }
+
+    /**
+     * Returns {@code true} if AE2LT 1.0.11's public pattern-provider UI profile
+     * contract is present at runtime.
+     *
+     * @since 1.0.11
+     */
+    public static boolean isPatternProviderUiProfileAvailable() {
+        Boolean cached = cachedPatternProviderUiProfileAvailability;
+        if (cached != null) {
+            return cached;
+        }
+        boolean available = classExists(PATTERN_PROVIDER_UI_PROFILE_CLASS);
+        cachedPatternProviderUiProfileAvailability = available;
         return available;
     }
 
@@ -206,6 +226,15 @@ public final class AE2LTNativeBridge {
      */
     public static String publicFrequencyBindingMenuHostClassName() {
         return PUBLIC_FREQUENCY_BINDING_MENU_HOST_CLASS;
+    }
+
+    /**
+     * Fully-qualified class name of AE2LT 1.0.11's public pattern-provider UI profile.
+     *
+     * @since 1.0.11
+     */
+    public static String patternProviderUiProfileClassName() {
+        return PATTERN_PROVIDER_UI_PROFILE_CLASS;
     }
 
     /**

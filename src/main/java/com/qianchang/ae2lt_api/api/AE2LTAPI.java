@@ -10,6 +10,8 @@ import com.qianchang.ae2lt_api.api.frequency.AE2LTFrequencyInfo;
 import com.qianchang.ae2lt_api.api.frequency.AE2LTTransmitterInfo;
 import com.qianchang.ae2lt_api.api.lightning.ILightningEnergyHandler;
 import com.qianchang.ae2lt_api.api.lightning.LightningEnergyTier;
+import com.qianchang.ae2lt_api.api.pattern.AE2LTPatternProviderApi;
+import com.qianchang.ae2lt_api.api.pattern.AE2LTPatternProviderUiProfileInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -192,6 +194,36 @@ public final class AE2LTAPI {
      */
     public boolean openAE2LTPublicFrequencyBindingScreen(AbstractContainerMenu menu) {
         return AE2LTFrequencyApi.openBindingScreen(menu);
+    }
+
+    /**
+     * Returns {@code true} if AE2LT 1.0.11's public pattern-provider UI profile API
+     * is available at runtime.
+     *
+     * @since 1.0.11
+     */
+    public boolean isAE2LTPatternProviderUiProfileAvailable() {
+        return AE2LTNativeBridge.isPatternProviderUiProfileAvailable();
+    }
+
+    /**
+     * Returns whether the block entity implements AE2LT's public overloaded
+     * pattern-provider UI profile contract.
+     *
+     * @since 1.0.11
+     */
+    public boolean isAE2LTPatternProviderUiProfileHost(BlockEntity blockEntity) {
+        return AE2LTPatternProviderApi.isUiProfileHost(blockEntity);
+    }
+
+    /**
+     * Returns the public overloaded pattern-provider UI profile advertised by the
+     * given block entity, if available.
+     *
+     * @since 1.0.11
+     */
+    public Optional<AE2LTPatternProviderUiProfileInfo> getAE2LTPatternProviderUiProfile(BlockEntity blockEntity) {
+        return AE2LTPatternProviderApi.getUiProfile(blockEntity);
     }
 
     /**
