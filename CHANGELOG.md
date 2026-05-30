@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.12] - 2026-05-30
+
 ### Fixed
-- Event bridge no longer unconditionally writes back the mirrored amount to AE2LT's native `LightningCollectedEvent`. The reflective `setAmount` call is now skipped when no listener modified the mirrored event, preventing potential amount corruption that could block lightning energy (HV / EHV) from entering storage cells. This is a defensive hardening; the confirmed root cause is still under investigation.
+- Event bridge no longer unconditionally writes back the mirrored amount to AE2LT's native `LightningCollectedEvent`. The reflective `setAmount` call is now skipped when no listener modified the mirrored event, reducing unnecessary event bridge intervention in AE2LT's native lightning collection flow.
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.12`.
 
 ## [1.0.11] - 2026-05-25
 
