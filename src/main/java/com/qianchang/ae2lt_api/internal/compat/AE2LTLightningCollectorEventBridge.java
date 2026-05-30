@@ -104,7 +104,14 @@ final class AE2LTLightningCollectorEventBridge {
                 return;
             }
 
-            invokeCached(contract.setAmount(), nativeEvent, mirroredEvent.getAmount(tier));
+            // Only write back if a listener actually modified the mirrored amount.
+            // Unconditional write-back can corrupt the native event's amount when
+            // the reflective setAmount call encounters subtle runtime issues (module
+            // access, autoboxing edge cases, or future AE2LT signature drift).
+            long mirroredAmount = mirroredEvent.getAmount(tier);
+            if (mirroredAmount != amount) {
+                invokeCached(contract.setAmount(), nativeEvent, mirroredAmount);
+            }
         } catch (RuntimeException e) {
             AE2LTAddonFramework.LOGGER.error(
                     "[AE2LT API] Failed to mirror AE2LT's public LightningCollectedEvent; leaving the original capture untouched.",
