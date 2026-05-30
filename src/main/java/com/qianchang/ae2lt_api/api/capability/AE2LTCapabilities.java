@@ -39,7 +39,7 @@ import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 public final class AE2LTCapabilities {
 
     /** Current API version — bump when breaking changes are introduced. */
-    public static final String API_VERSION = "1.0.10-1.20.1forge";
+    public static final String API_VERSION = "1.0.10-hotfix.1-1.20.1forge";
 
     /**
      * Block-side capability for lightning energy I/O.
