@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.13] - 2026-05-31
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.13`.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.12` after source-level review of the AE2LT 1.0.12 release line.
+
+### Compatibility
+- AE2LT 1.0.12 does not introduce new public API changes; the first-party lightning capability/event, wireless frequency, and pattern-provider UI profile contracts remain compatible with 1.0.11.
+- No new bridge classes were required for this alignment.
+
 ## [1.0.12] - 2026-05-30
 
 ### Fixed
@@ -220,6 +230,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.0.10-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
 [1.0.11]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.11
+[1.0.13]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.13
 [1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
 [1.0.8]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.8

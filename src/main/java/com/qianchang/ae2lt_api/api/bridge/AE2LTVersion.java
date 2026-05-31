@@ -9,10 +9,10 @@ import java.util.Optional;
  * Version helpers for addon code that needs to gate AE2 Lightning Tech
  * integration behavior at runtime.
  *
- * <p>AE2LT 1.0.11 keeps the first-party lightning capability/event contracts
- * used by the previous checked release lines and adds the public overloaded
- * pattern-provider UI profile API. The public wireless frequency API introduced
- * in 1.0.8 remains compatible through 1.0.11.</p>
+ * <p>AE2LT 1.0.12 keeps the first-party lightning capability/event contracts
+ * used by the previous checked release lines and the public overloaded
+ * pattern-provider UI profile API introduced in 1.0.11. The public wireless
+ * frequency API introduced in 1.0.8 remains compatible through 1.0.12.</p>
  *
  * @since 1.0.4
  */
@@ -22,7 +22,7 @@ public final class AE2LTVersion {
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
     /** AE2 Lightning Tech release this Thunderbolt_lib version was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.11";
+    public static final String TARGET_AE2LT_VERSION = "1.0.12";
 
     /** First AE2LT release line that exposed the native first-party API package. */
     public static final String FIRST_PARTY_API_INTRODUCED_VERSION = "1.0.2";
