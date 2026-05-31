@@ -39,7 +39,7 @@ public final class AE2LTCapabilities {
     private static final String MOD_ID = "ae2lt_api";
 
     /** Current API version for the 26.1.2 NeoForge migration branch. */
-        public static final String API_VERSION = "1.0.10-alpha-hotfix.1.26.1.2neoforge";
+        public static final String API_VERSION = "1.0.11-alpha.26.1.2neoforge";
 
     /**
      * Sided block capability for lightning energy I/O.

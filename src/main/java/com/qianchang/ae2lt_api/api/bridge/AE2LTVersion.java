@@ -10,7 +10,7 @@ import java.util.Optional;
  * integration behavior at runtime.
  *
  * <p>This branch targets AE2LT's 26.1.2 NeoForge port line
- * ({@code 1.0.0alpha-26.1.2neoforge}). That port keeps the first-party
+ * ({@code 1.0.1alpha-26.1.2neoforge}). That port keeps the first-party
  * lightning capability/event contracts and the public wireless frequency API
  * introduced by the stable 1.0.x line, but its version string no longer sorts
  * cleanly against the earlier semantic-style releases. The helpers below treat
@@ -25,7 +25,7 @@ public final class AE2LTVersion {
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
     /** AE2 Lightning Tech port release this Thunderbolt_lib branch was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.0alpha-26.1.2neoforge";
+    public static final String TARGET_AE2LT_VERSION = "1.0.1alpha-26.1.2neoforge";
 
     /** Latest stable AE2LT release line whose public API shape was also reviewed. */
     public static final String LAST_VERIFIED_STABLE_AE2LT_VERSION = "1.0.10";

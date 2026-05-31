@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.11-alpha.26.1.2neoforge] - 2026-05-31
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.11-alpha.26.1.2neoforge`.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.1alpha-26.1.2neoforge` after source-level review of the AE2LT 26.1.2 port 1.0.1alpha release line.
+
+### Compatibility
+- AE2LT 1.0.1alpha-26.1.2neoforge does not introduce new public API changes compared with 1.0.0alpha-26.1.2neoforge; the first-party lightning capability/event and wireless frequency contracts remain intact.
+- No new bridge classes were required for this alignment.
+
 ## [1.0.10-alpha.26.1.2neoforge] - 2026-05-20
 
 ### Added
@@ -192,6 +202,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LightningCollectedEvent` for intercepting AE2LT collector pickups.
 - Project renamed to `Thunderbolt_lib`; runtime mod id retained as `ae2lt_api` for backward compatibility.
 
+[1.0.11-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
 [1.0.10-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
 [1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
