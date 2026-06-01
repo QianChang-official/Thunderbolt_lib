@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+- Consolidated local maintenance notes into the canonical changelog and removed branch-local draft documents (`BLOCKERS.md`, `PROJECT_FRAMEWORK_COMPARISON_zh_CN.md`) from tracking.
+- Documented that README / Markdown documentation is maintained only on the `main` branch.
+- Clarified maintenance handling for release title / tag history and multi-line release assets.
+
+### Maintenance
+- Recorded that GitHub Release tags may preserve historical internal version tags while public release titles and asset names reflect the AE2LT target version when needed.
+- Clarified that multi-line release assets can originate from separate maintenance branches even when GitHub Release `targetCommitish` points to `main`.
+
 ## [1.0.13] - 2026-05-31
 
 ### Changed

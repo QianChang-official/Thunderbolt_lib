@@ -31,15 +31,15 @@ The namespace split remains intentional:
 
 | Line | Repository / branch | Thunderbolt_lib version | AE2LT target | Minecraft | Loader | Java | Public asset |
 |---|---|---|---|---|---|---|---|
-| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.10` | `1.0.10-1.20.1forge` | `1.0.10-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.10.jar` |
-| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.11` | `1.0.11` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.11.jar` |
-| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.10-alpha.26.1.2neoforge` | `1.0.0alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar` |
+| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.10` | `1.0.10-hotfix.1-1.20.1forge` | `1.0.10-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix.1.jar` |
+| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.13` | `1.0.12` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar` |
+| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.11-alpha.26.1.2neoforge` | `1.0.1alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar` |
 
 ## Recommended Downloads
 
-- For the current NeoForge 1.21.1 main line, use `Thunderbolt_lib_1.21.1_neoforge_1.0.11.jar`
-- Forge 1.20.1 remains available from the **Thunderbolt_lib 1.0.10 Unified Release**
-- NeoForge 26.1.2 remains available from the **Thunderbolt_lib 1.0.10 Unified Release**
+- For the current NeoForge 1.21.1 main line, use `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar`
+- Forge 1.20.1 remains available from the **Thunderbolt_lib 1.0.11 Hotfix**
+- NeoForge 26.1.2 remains available from the **Thunderbolt_lib 1.0.12**
 
 Thunderbolt_lib maintains multiple release lines, but **not every release re-uploads every maintained jar**.
 
@@ -54,16 +54,17 @@ Thunderbolt_lib_<minecraft>_<loader>_<ae2lt-target-name>.jar
 Examples:
 
 ```text
-Thunderbolt_lib_1.20.1_forge_1.0.10.jar
-Thunderbolt_lib_1.21.1_neoforge_1.0.11.jar
-Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar
+Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix.1.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.11-hotfix1.jar
+Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar
 ```
 
 Special rule for the 26.1.2 port line:
 
-- Internal AE2LT target: `1.0.0alpha-26.1.2neoforge`
-- Public asset name: `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha.jar`
-- Do **not** publish `Thunderbolt_lib_26.1.2_neoforge_1.0.0alpha-26.1.2neoforge.jar`
+- Internal AE2LT target: `1.0.1alpha-26.1.2neoforge`
+- Public asset name: `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar`
+- Do **not** publish `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha-26.1.2neoforge.jar`
 
 ## Release Policy
 
@@ -136,14 +137,14 @@ Example for the NeoForge 1.21.1 main line:
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.11,)"
+    versionRange = "[1.0.13,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.11,)"
+    versionRange = "[1.0.12,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -159,6 +160,15 @@ Thunderbolt_lib tries to keep compatibility handling inside the bridge layer:
 - high-version runtime bridges can refuse to register when the verified AE2 / AE2LT / AppEng contract is not present
 
 This does **not** mean Thunderbolt_lib is intended to be installed without AE2LT by players. The matching AE2LT line is still a runtime dependency.
+
+## Release tag / title historical note
+
+Because GitHub tags should not be rewritten once created (to avoid breaking existing references), some Thunderbolt_lib releases may have a tag name that does not exactly match the public release title:
+
+- The tag may keep the original internal version (e.g. `v1.0.13`, `v1.0.12`).
+- The Release title and asset filenames are corrected to reflect the actual AE2LT target version (e.g. `Thunderbolt_lib 1.0.12`, `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar`).
+
+**When downloading, use the Release title, the asset name in Release notes, and the SHA256 as the authoritative reference. Do not rely on the tag name alone to determine the AE2LT target version.**
 
 ## Documentation Policy
 
