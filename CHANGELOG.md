@@ -16,10 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recorded that GitHub Release tags may preserve historical internal version tags while public release titles and asset names reflect the AE2LT target version when needed.
 - Clarified that multi-line release assets can originate from separate maintenance branches even when GitHub Release `targetCommitish` points to `main`.
 
-## [1.0.13] - 2026-05-31
+## [1.0.12-hotfix1] - 2026-05-31
 
 ### Changed
-- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.13`.
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.12-hotfix1`.
 - `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.12` after source-level review of the AE2LT 1.0.12 release line.
 
 ### Compatibility
@@ -239,7 +239,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.0.10-alpha.26.1.2neoforge]: https://github.com/QianChang-official/Thunderbolt_lib/tree/Minecraft26.1.2neoforge
 [1.0.11]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.11
-[1.0.13]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.13
+[1.0.12-hotfix1]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.12-hotfix1
 [1.0.10]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.10
 [1.0.7]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.7
 [1.0.8]: https://github.com/QianChang-official/Thunderbolt_lib/releases/tag/v1.0.8
