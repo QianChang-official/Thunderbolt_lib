@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.14] - 2026-06-07
+
+### Changed
+- `mod_version` and `AE2LTCapabilities.API_VERSION` bumped to `1.0.14`.
+- `AE2LTVersion.TARGET_AE2LT_VERSION` and `FIRST_PARTY_API_LAST_VERIFIED_VERSION` advanced to `1.0.14` after source-level review of the AE2LT 1.0.14 release line.
+
+### Compatibility
+- AE2LT 1.0.13-1.0.14 do not introduce new public API surface; the first-party lightning capability/event, wireless frequency, and pattern-provider UI profile contracts remain compatible with 1.0.12.
+- The overloaded pattern-provider menu now syncs UI profile flags and title translation key from the block entity, matching AE2LT 1.0.14's menu improvements.
+- No new bridge classes were required for this alignment; existing reflective bridges remain valid.
+
 ### Documentation
+- Updated changelog with 1.0.14 release notes and compatibility verification results.
+
+## [1.0.12-hotfix1] - 2026-05-31
 - Consolidated local maintenance notes into the canonical changelog and removed branch-local draft documents (`BLOCKERS.md`, `PROJECT_FRAMEWORK_COMPARISON_zh_CN.md`) from tracking.
 - Documented that README / Markdown documentation is maintained only on the `main` branch.
 - Clarified maintenance handling for release title / tag history and multi-line release assets.
