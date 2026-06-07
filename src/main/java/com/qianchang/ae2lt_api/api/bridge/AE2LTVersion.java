@@ -21,7 +21,7 @@ public final class AE2LTVersion {
     public static final String LIBRARY_API_VERSION = AE2LTCapabilities.API_VERSION;
 
     /** AE2 Lightning Tech release this Thunderbolt_lib version was checked against. */
-    public static final String TARGET_AE2LT_VERSION = "1.0.10-1.20.1forge";
+    public static final String TARGET_AE2LT_VERSION = "1.0.13-1.20.1forge";
 
     /** First AE2LT release line that exposed the native first-party API package. */
     public static final String FIRST_PARTY_API_INTRODUCED_VERSION = "1.0.2";
