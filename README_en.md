@@ -31,15 +31,15 @@ The namespace split remains intentional:
 
 | Line | Repository / branch | Thunderbolt_lib version | AE2LT target | Minecraft | Loader | Java | Public asset |
 |---|---|---|---|---|---|---|---|
-| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.10` | `1.0.10-hotfix1-1.20.1forge` | `1.0.10-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix1.jar` |
-| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.12-hotfix1` | `1.0.12` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar` |
-| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.11-alpha.26.1.2neoforge` | `1.0.1alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar` |
+| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.13` | `1.0.13-hotfix1-1.20.1forge` | `1.0.13-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.13-hotfix1.jar` |
+| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.14` | `1.0.14` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.14.jar` |
+| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.2-alpha.26.1.2neoforge` | `1.0.2alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar` |
 
 ## Recommended Downloads
 
-- For the current NeoForge 1.21.1 main line, use `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar`
-- Forge 1.20.1 remains available from the **Thunderbolt_lib 1.0.11 Hotfix**
-- NeoForge 26.1.2 remains available from the **Thunderbolt_lib 1.0.12**
+- For the current NeoForge 1.21.1 main line, use `Thunderbolt_lib_1.21.1_neoforge_1.0.14.jar`
+- Forge 1.20.1 remains available from the **Thunderbolt_lib 1.0.13 Hotfix**
+- NeoForge 26.1.2 remains available from the **Thunderbolt_lib 1.0.2 Alpha (26.1.2)**
 
 Thunderbolt_lib maintains multiple release lines, but **not every release re-uploads every maintained jar**.
 
@@ -54,17 +54,17 @@ Thunderbolt_lib_<minecraft>_<loader>_<ae2lt-target-name>.jar
 Examples:
 
 ```text
-Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix1.jar
-Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar
-Thunderbolt_lib_1.21.1_neoforge_1.0.11-hotfix1.jar
-Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar
+Thunderbolt_lib_1.20.1_forge_1.0.13-hotfix1.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.14.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.12-hotfix1.jar
+Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar
 ```
 
 Special rule for the 26.1.2 port line:
 
-- Internal AE2LT target: `1.0.1alpha-26.1.2neoforge`
-- Public asset name: `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar`
-- Do **not** publish `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha-26.1.2neoforge.jar`
+- Internal AE2LT target: `1.0.2alpha-26.1.2neoforge`
+- Public asset name: `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar`
+- Do **not** publish `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha-26.1.2neoforge.jar`
 
 ## Release Policy
 
@@ -76,8 +76,9 @@ Thunderbolt_lib has multiple maintained lines, but release uploads are line-spec
 
 For example:
 
-- `v1.0.11` is the NeoForge 1.21.1 update line
-- Forge 1.20.1 and NeoForge 26.1.2 assets stay on `v1.0.10`
+- `v1.0.14` is the NeoForge 1.21.1 update line
+- Forge 1.20.1 assets stay on `v1.0.13-hotfix1`
+- NeoForge 26.1.2 assets stay on `v1.0.2-alpha.26.1.2neoforge`
 
 ## API Overview
 
@@ -137,14 +138,14 @@ Example for the NeoForge 1.21.1 main line:
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.12-hotfix1,)"
+    versionRange = "[1.0.14,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.12,)"
+    versionRange = "[1.0.14,)"
     ordering = "AFTER"
     side = "BOTH"
 ```

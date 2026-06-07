@@ -35,15 +35,15 @@ Thunderbolt_lib 持续保留自己的 Java 包与命名空间：
 
 | 维护线 | 本地仓库 / 分支 | Thunderbolt_lib 版本 | 对齐 AE2LT | Minecraft | Loader | Java | 当前公开资产 |
 |---|---|---|---|---|---|---|---|
-| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.10` | `1.0.10-hotfix1-1.20.1forge` | `1.0.10-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix1.jar` |
-| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.12-hotfix1` | `1.0.12` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar` |
-| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.11-alpha.26.1.2neoforge` | `1.0.1alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar` |
+| Forge 1.20.1 | `Thunderbolt_lib_forge_1.20.1` / `release/forge-1.20.1-v1.0.13` | `1.0.13-hotfix1-1.20.1forge` | `1.0.13-1.20.1forge` | `1.20.1` | Forge `47.4.20` | `17-21` | `Thunderbolt_lib_1.20.1_forge_1.0.13-hotfix1.jar` |
+| NeoForge 1.21.1 | `Thunderbolt_lib_neoforge_1.21.1` / `main` | `1.0.14` | `1.0.14` | `1.21.1` | NeoForge `21.1.x` | `21` | `Thunderbolt_lib_1.21.1_neoforge_1.0.14.jar` |
+| NeoForge 26.1.2 | `Thunderbolt_lib_neoforge_26.1.2` / `Minecraft26.1.2neoforge` | `1.0.2-alpha.26.1.2neoforge` | `1.0.2alpha-26.1.2neoforge` | `26.1.2` | NeoForge `26.1.2.21-beta` | `25` | `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar` |
 
 ## 最新推荐下载
 
-- **需要 NeoForge 1.21.1 主线**：使用 `Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar`
-- **需要 Forge 1.20.1 维护线**：从 **Thunderbolt_lib 1.0.11 Hotfix** 获取 `Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix1.jar`
-- **需要 NeoForge 26.1.2 维护线**：从 **Thunderbolt_lib 1.0.12** 获取 `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar`
+- **需要 NeoForge 1.21.1 主线**：使用 `Thunderbolt_lib_1.21.1_neoforge_1.0.14.jar`
+- **需要 Forge 1.20.1 维护线**：从 **Thunderbolt_lib 1.0.13 Hotfix** 获取 `Thunderbolt_lib_1.20.1_forge_1.0.13-hotfix1.jar`
+- **需要 NeoForge 26.1.2 维护线**：从 **Thunderbolt_lib 1.0.2 Alpha (26.1.2)** 获取 `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar`
 
 这三条线同时维护，但**不是每次 Release 都会重新上传全部维护线资产**。
 
@@ -58,17 +58,17 @@ Thunderbolt_lib_<minecraft版本号>_<forge还是neoforge>_<要对齐的AE2LT版
 示例：
 
 ```text
-Thunderbolt_lib_1.20.1_forge_1.0.10-hotfix1.jar
-Thunderbolt_lib_1.21.1_neoforge_1.0.12.jar
-Thunderbolt_lib_1.21.1_neoforge_1.0.11-hotfix1.jar
-Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar
+Thunderbolt_lib_1.20.1_forge_1.0.13-hotfix1.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.14.jar
+Thunderbolt_lib_1.21.1_neoforge_1.0.12-hotfix1.jar
+Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar
 ```
 
 特别规则：
 
-- 如果内部 AE2LT target 是 `1.0.1alpha-26.1.2neoforge`
-- 对外公开资产名必须是 `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha.jar`
-- 不要写成 `Thunderbolt_lib_26.1.2_neoforge_1.0.1alpha-26.1.2neoforge.jar`
+- 如果内部 AE2LT target 是 `1.0.2alpha-26.1.2neoforge`
+- 对外公开资产名必须是 `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha.jar`
+- 不要写成 `Thunderbolt_lib_26.1.2_neoforge_1.0.2alpha-26.1.2neoforge.jar`
 
 ## Release 策略
 
@@ -99,18 +99,19 @@ Thunderbolt_lib 有多条维护线，但发布时遵循“**只上传本轮实�
 
 这是当前默认维护主线，也是 README 权威入口所在分支：
 
-- 当前版本 `1.0.12-hotfix1`
-- 对齐 AE2LT `1.0.12`
+- 当前版本 `1.0.14`
+- 对齐 AE2LT `1.0.14`
 - 已包含 AE2LT 1.0.11 公共 `PatternProviderUiProfile` 的反射桥接
 - 已包含 1.0.12 事件桥接防御加固（仅在 listener 实际修改时才回写 mirrored amount）
+- 兼容 AE2LT 1.0.13-1.0.14 的 pattern-provider UI profile 改进（菜单同步 UI profile flags 与标题翻译键）
 - 继续维护公共频率桥、Collector event mirror、配方构建器与运行时桥接元数据
 
 ### NeoForge 26.1.2
 
 这条线用于高版本移植与合同收敛：
 
-- 当前版本 `1.0.11-alpha.26.1.2neoforge`
-- 对齐 AE2LT `1.0.1alpha-26.1.2neoforge`
+- 当前版本 `1.0.2-alpha.26.1.2neoforge`
+- 对齐 AE2LT `1.0.2alpha-26.1.2neoforge`
 - 高版本 AE2 / AE2LT / AppEng 交互保持反射化
 - 启动期执行合同预检，运行时桥接在合同漂移时 fail-closed
 
@@ -129,14 +130,14 @@ Thunderbolt_lib 在运行时仍要求目标维护线对应的 AE2LT 主模组存
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.12-hotfix1,)"
+    versionRange = "[1.0.14,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.12,)"
+    versionRange = "[1.0.14,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -147,14 +148,14 @@ Thunderbolt_lib 在运行时仍要求目标维护线对应的 AE2LT 主模组存
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     mandatory = true
-    versionRange = "[1.0.10-hotfix1-1.20.1forge,)"
+    versionRange = "[1.0.13-hotfix1-1.20.1forge,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     mandatory = true
-    versionRange = "[1.0.10-1.20.1forge,)"
+    versionRange = "[1.0.13-1.20.1forge,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
@@ -165,14 +166,14 @@ Thunderbolt_lib 在运行时仍要求目标维护线对应的 AE2LT 主模组存
 [[dependencies.yourmodid]]
     modId = "ae2lt_api"
     type = "required"
-    versionRange = "[1.0.10-alpha.26.1.2neoforge,)"
+    versionRange = "[1.0.2-alpha.26.1.2neoforge,)"
     ordering = "AFTER"
     side = "BOTH"
 
 [[dependencies.yourmodid]]
     modId = "ae2lt"
     type = "required"
-    versionRange = "[1.0.0alpha-26.1.2neoforge,)"
+    versionRange = "[1.0.2alpha-26.1.2neoforge,)"
     ordering = "AFTER"
     side = "BOTH"
 ```
