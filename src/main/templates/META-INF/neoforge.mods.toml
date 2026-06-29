@@ -10,6 +10,9 @@ ${mod_description}
 '''
     authors="${mod_authors}"
 
+[[mixins]]
+    config="${mod_id}.mixins.json"
+
 [[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
@@ -28,12 +31,5 @@ ${mod_description}
     modId="ae2"
     type="required"
     versionRange="[19.1,)"
-    ordering="AFTER"
-    side="BOTH"
-
-[[dependencies.${mod_id}]]
-    modId="ae2lt"
-    type="required"
-    versionRange="[1.0.11,)"
     ordering="AFTER"
     side="BOTH"

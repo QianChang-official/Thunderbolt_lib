@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.qianchang.ae2lt_core.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CraftingCalculationMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
