@@ -348,13 +348,52 @@ class CraftPlannerV2Test {
     }
 
     @Test
-    void recursionFallsBackAsUnsupported() {
+    void pureCycleIsBrokenTowardTargetNotDeclined() {
+        // A -> B, B -> A : the back-edge from B to A (the target, being made) is cut, so B becomes a
+        // leaf. With no stock the plan is supported but infeasible (missing B), never an infinite loop.
         CraftGraph<String> g = CraftGraph.<String>builder()
                 .pattern("A", 1, List.of(CraftInput.of("B", 1)))
                 .pattern("B", 1, List.of(CraftInput.of("A", 1)))
                 .build();
 
-        assertFalse(CraftPlannerV2.plan(g, "A", 1).supported());
+        CraftPlan<String> plan = CraftPlannerV2.plan(g, "A", 1);
+        assertTrue(plan.supported());
+        assertFalse(plan.feasible());
+        assertEquals(1L, plan.missing().get("B"));
+    }
+
+    @Test
+    void compressCycleMakesBlocksFromIngotStock() {
+        // 9 ingot -> 1 block (compress) and 1 block -> 9 ingot (decompress). Target = block, stock =
+        // ingots: the decompress recipe is the back-edge and gets cut, so blocks are made from ingots.
+        CraftGraph<String> g = CraftGraph.<String>builder()
+                .pattern("block", 1, List.of(CraftInput.of("ingot", 9)))
+                .pattern("ingot", 9, List.of(CraftInput.of("block", 1)))
+                .stock("ingot", 64)
+                .build();
+
+        CraftPlan<String> plan = CraftPlannerV2.plan(g, "block", 5);
+        assertTrue(plan.supported());
+        assertTrue(plan.feasible());
+        assertEquals(45L, plan.usedStock().get("ingot")); // 5 blocks * 9 ingots
+        assertTrue(plan.missing().isEmpty());
+    }
+
+    @Test
+    void decompressCycleMakesIngotsFromBlockStock() {
+        // Same pair, opposite direction: target = ingot, stock = blocks. Now the compress recipe is the
+        // back-edge that gets cut, so ingots come from decompressing blocks.
+        CraftGraph<String> g = CraftGraph.<String>builder()
+                .pattern("block", 1, List.of(CraftInput.of("ingot", 9)))
+                .pattern("ingot", 9, List.of(CraftInput.of("block", 1)))
+                .stock("block", 10)
+                .build();
+
+        CraftPlan<String> plan = CraftPlannerV2.plan(g, "ingot", 20);
+        assertTrue(plan.supported());
+        assertTrue(plan.feasible());
+        assertEquals(3L, plan.usedStock().get("block")); // ceil(20/9) = 3 blocks -> 27 ingots
+        assertTrue(plan.missing().isEmpty());
     }
 
     /**

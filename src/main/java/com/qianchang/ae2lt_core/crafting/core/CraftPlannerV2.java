@@ -16,9 +16,14 @@ import java.util.Set;
  *
  * <p>This is the evolution of {@link CraftPlanner} (v1, closed-form two-pass). It keeps v1's strengths
  * — quantity-independent batching ({@code ceil} arithmetic), {@code returned} (container/catalyst)
- * inputs in closed form, saturating arithmetic, and the cycle/recursion decline — and adds:
+ * inputs in closed form, saturating arithmetic — and adds:
  *
  * <ul>
+ *   <li><b>In-engine cycle breaking ("去头尾")</b>: instead of declining when the recipe graph has a
+ *       cycle, a DFS from the target drops back-edges, keeping the recipe direction toward the target
+ *       and cutting the reverse. A compress/decompress pair (1 block ⇄ 9 ingots) is planned directly;
+ *       the reverse side resolves from stock/missing. Cuts only remove options, so feasibility is never
+ *       overstated (no false positives).</li>
  *   <li><b>Shared pool + byproducts</b>: stock and crafting byproducts live in one mutable pool;
  *       demand draws byproducts first, then stock, then crafts. Multi-output patterns are supported
  *       (a pattern's extra outputs feed sibling demands).</li>
@@ -91,13 +96,18 @@ public final class CraftPlannerV2<K> {
             return new CraftPlan<>(true, true, Map.of(), Map.of(), Map.of(), Map.of(), 0, false);
         }
 
-        Set<K> items = reachable(target);
-        List<K> order = topoOrder(items);
-        if (order == null) {
-            return CraftPlan.unsupported(); // recursion / cycle — defer to AE2's simulator
-        }
-        for (K x : items) {
-            patternsByOutput.put(x, graph.patternsFor(x));
+        // Build an acyclic view of the reachable recipe graph: a DFS from the target drops any recipe
+        // whose input is an ancestor still being expanded (a back-edge), i.e. AE2's "去头尾". For a
+        // compress/decompress pair (1 block ⇄ 9 ingots) this keeps the direction toward the target
+        // (compress when making blocks, decompress when making ingots) and cuts the reverse, so the
+        // other side falls back to stock/missing — exactly what a sane plan does. No cycle ever reaches
+        // the topological passes, so we never bail to AE2 just because a reverse recipe exists.
+        Set<K> items = new LinkedHashSet<>();
+        List<K> postOrder = new ArrayList<>();
+        buildDag(target, postOrder, items);
+        List<K> order = new ArrayList<>(postOrder.size()); // target-first topo order = reverse post-order
+        for (int i = postOrder.size() - 1; i >= 0; i--) {
+            order.add(postOrder.get(i));
         }
         this.capacity = capacityFromOrder(order, items.size());
 
@@ -126,62 +136,73 @@ public final class CraftPlannerV2<K> {
 
     // ---- graph construction ------------------------------------------------
 
-    private Set<K> reachable(K target) {
-        Set<K> items = new LinkedHashSet<>();
-        items.add(target);
-        Deque<K> bfs = new ArrayDeque<>();
-        bfs.add(target);
-        while (!bfs.isEmpty()) {
-            K x = bfs.poll();
-            for (CraftPattern<K> p : graph.patternsFor(x)) {
-                for (CraftInput<K> in : p.inputs()) {
-                    if (items.add(in.key())) {
-                        bfs.add(in.key());
-                    }
-                }
-            }
+    private static final int GRAY = 1; // on the current DFS path (an ancestor)
+    private static final int BLACK = 2; // fully expanded
+
+    private static final class Frame<K> {
+        final K node;
+        final List<K> children;
+        int i;
+
+        Frame(K node, List<K> children) {
+            this.node = node;
+            this.children = children;
         }
-        return items;
     }
 
     /**
-     * Kahn topological order on {@code X -> input} edges (target first, leaves last). Returns
-     * {@code null} if a cycle (recursion) is present — the fast path declines and the caller falls
-     * back to AE2's simulator. {@code O(n + E)}.
+     * Iterative DFS from {@code target} that records each node's <em>acyclic</em> recipe set into
+     * {@link #patternsByOutput} and emits a post-order. A recipe is kept only if none of its inputs is an
+     * ancestor currently on the DFS path ({@code GRAY}); such a recipe would close a cycle ("去头尾"), so
+     * it is dropped and the input is satisfied from stock/another recipe instead. Each node and edge is
+     * touched once → {@code O(n + E)}; iterative (not recursive) so deep graphs can't overflow the stack.
      */
-    private List<K> topoOrder(Set<K> items) {
-        Map<K, Set<K>> deps = new HashMap<>();
-        Map<K, Integer> indeg = new HashMap<>();
-        for (K x : items) {
-            indeg.putIfAbsent(x, 0);
-            Set<K> d = new LinkedHashSet<>();
-            for (CraftPattern<K> p : graph.patternsFor(x)) {
-                for (CraftInput<K> in : p.inputs()) {
-                    d.add(in.key());
+    private void buildDag(K target, List<K> postOrderOut, Set<K> itemsOut) {
+        Map<K, Integer> color = new HashMap<>();
+        Deque<Frame<K>> stack = new ArrayDeque<>();
+        color.put(target, GRAY);
+        itemsOut.add(target);
+        stack.push(frameFor(target, color, itemsOut));
+        while (!stack.isEmpty()) {
+            Frame<K> f = stack.peek();
+            if (f.i < f.children.size()) {
+                K c = f.children.get(f.i++);
+                if (color.get(c) == null) { // WHITE -> descend (GRAY children are excluded by frameFor)
+                    color.put(c, GRAY);
+                    stack.push(frameFor(c, color, itemsOut));
+                }
+            } else {
+                color.put(f.node, BLACK);
+                postOrderOut.add(f.node);
+                stack.pop();
+            }
+        }
+    }
+
+    private Frame<K> frameFor(K x, Map<K, Integer> color, Set<K> itemsOut) {
+        List<CraftPattern<K>> all = graph.patternsFor(x);
+        List<CraftPattern<K>> usable = new ArrayList<>(all.size());
+        Set<K> children = new LinkedHashSet<>();
+        for (CraftPattern<K> p : all) {
+            boolean cyclic = false;
+            for (CraftInput<K> in : p.inputs()) {
+                Integer col = color.get(in.key());
+                if (col != null && col == GRAY) { // input is an ancestor being made -> back-edge, cut it
+                    cyclic = true;
+                    break;
                 }
             }
-            deps.put(x, d);
-            for (K dep : d) {
-                indeg.merge(dep, 1, Integer::sum);
+            if (cyclic) {
+                continue;
+            }
+            usable.add(p);
+            for (CraftInput<K> in : p.inputs()) {
+                children.add(in.key());
+                itemsOut.add(in.key());
             }
         }
-        List<K> order = new ArrayList<>(items.size());
-        Deque<K> ready = new ArrayDeque<>();
-        for (K x : items) {
-            if (indeg.get(x) == 0) {
-                ready.add(x);
-            }
-        }
-        while (!ready.isEmpty()) {
-            K x = ready.poll();
-            order.add(x);
-            for (K dep : deps.get(x)) {
-                if (indeg.merge(dep, -1, Integer::sum) == 0) {
-                    ready.add(dep);
-                }
-            }
-        }
-        return order.size() == items.size() ? order : null;
+        patternsByOutput.put(x, usable);
+        return new Frame<>(x, new ArrayList<>(children));
     }
 
     /** cap[X] = stock + max recipe-producible (reverse-topo, byproducts ignored = optimistic upper bound). */
@@ -190,7 +211,7 @@ public final class CraftPlannerV2<K> {
         for (int i = order.size() - 1; i >= 0; i--) {
             K x = order.get(i);
             long best = 0;
-            for (CraftPattern<K> p : graph.patternsFor(x)) {
+            for (CraftPattern<K> p : patternsByOutput.getOrDefault(x, List.of())) {
                 best = Math.max(best, producibleVia(p, cap));
                 if (Sat.isSaturated(best)) {
                     break;

@@ -53,7 +53,9 @@ import com.qianchang.ae2lt_core.crafting.core.Sat;
  *   <li>Out of envelope (emit / substitution(fuzzy) / container / catalyst) → {@link
  *       FastAttempt#decline()} and AE2's original attempt runs unchanged. Byproducts ARE handled
  *       (routed through a shared pool).</li>
- *   <li><b>Recursion / cycle</b> → decline; AE2's vanilla recursion handling ("去头尾") takes over.</li>
+ *   <li><b>Recursion / cycle</b> → handled in-engine: the v2 planner breaks back-edges ("去头尾") so a
+ *       compress/decompress pair (1 block ⇄ 9 ingots) is planned directly instead of declining. The
+ *       reverse side resolves from stock/missing; cuts only remove options, never overstate feasibility.</li>
  *   <li>A <b>feasible</b> plan is always safe to return (mass-balanced ⇒ executable), even with
  *       byproducts and multiple recipe choices.</li>
  *   <li><b>Infeasible</b>: authoritative iff the bounded search did not hit its per-node cap
@@ -129,7 +131,7 @@ public final class FastCraftingPlanner {
 
         CraftPlan<AEKey> plan = CraftPlannerV2.plan(builder.build(), output, amount);
         if (!plan.supported()) {
-            return FastAttempt.decline(); // recursion / cycle -> AE2's vanilla 去头尾 handling
+            return FastAttempt.decline(); // defensive: v2 breaks cycles in-engine, so this is rare
         }
 
         boolean multi = multiplePaths[0];
