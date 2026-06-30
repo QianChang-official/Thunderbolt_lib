@@ -184,6 +184,6 @@ If you need installation guidance, compatibility information, maintained-line st
 
 ## License and Disclaimer
 
-- **Code license**: MIT
+- **Code license**: GNU LGPL v3.0 (see [LICENSE](LICENSE))
 - **Name / project notice**: see [DISCLAIMER.md](DISCLAIMER.md)
 - **Version history**: see [CHANGELOG.md](CHANGELOG.md)

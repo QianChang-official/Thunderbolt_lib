@@ -11,6 +11,21 @@ public final class CoreConfig {
     public static final boolean FAST_PATH_ENABLED =
             !"false".equalsIgnoreCase(System.getProperty("ae2lt_core.fastPath", "true"));
 
+    /**
+     * Channel capacity granted per overloaded controller by the channel/max-flow grid mixins.
+     * Defaults to 128; the host mod (AE2 Lightning Tech) overwrites it from its own config during
+     * setup via {@link #setChannelsPerController(int)} so the value stays user-configurable.
+     */
+    private static volatile int channelsPerController = 128;
+
+    public static int channelsPerController() {
+        return channelsPerController;
+    }
+
+    public static void setChannelsPerController(int value) {
+        channelsPerController = value;
+    }
+
     private CoreConfig() {
     }
 }

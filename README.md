@@ -296,6 +296,6 @@ Thunderbolt_lib 的设计目标之一是把运行时耦合控制在桥接层内�
 
 ## 许可证 / 免责声明
 
-- **代码许可证**：MIT License
+- **代码许可证**：GNU LGPL v3.0（见 [LICENSE](LICENSE)）
 - **项目说明与名称声明**：见 [DISCLAIMER.md](DISCLAIMER.md)
 - **版本记录**：见 [CHANGELOG.md](CHANGELOG.md)

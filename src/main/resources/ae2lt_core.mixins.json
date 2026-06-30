@@ -1,10 +1,22 @@
 {
   "required": true,
   "minVersion": "0.8.5",
-  "package": "com.qianchang.ae2lt_core.mixin",
+  "package": "com.qianchang.ae2lt_core.ae2.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "CraftingCalculationMixin"
+    "CraftingCalculationMixin",
+    "GridConnectionMaxChannelsMixin",
+    "GridGetMachineNodesMixin",
+    "GridNodeMaxChannelsMixin",
+    "PathingCalculationCapMixin",
+    "CraftingCpuLogicBatchMixin",
+    "AdvCraftingCpuLogicBatchMixin",
+    "ExecutingCraftingJobAccessor",
+    "ElapsedTimeTrackerAccessor",
+    "TaskProgressAccessor",
+    "AaeExecutingCraftingJobAccessor",
+    "AaeElapsedTimeTrackerAccessor",
+    "AaeTaskProgressAccessor"
   ],
   "client": [],
   "injectors": {

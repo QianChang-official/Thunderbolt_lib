@@ -57,6 +57,14 @@ dependencies {
     // `crafting.core` has NO AE2 dependency and is unit-tested standalone.
     compileOnly "curse.maven:applied-energistics-2-223794:7027323"
 
+    // AdvancedAE (+ its compile-time companions) — the lib hosts the batch-CPU mixin/accessors that
+    // target AAE's crafting CPU. compileOnly: AAE is provided by the modpack at runtime when present;
+    // the @Pseudo mixins simply no-op if AAE is absent.
+    compileOnly "curse.maven:advancedae-1084104:7668664"
+    compileOnly "curse.maven:extendedae-892005:7727948"
+    compileOnly "curse.maven:glodium-957920:5821676"
+    compileOnly "curse.maven:applied-flux-965012:7429565"
+
     // Unit tests for the pure planner core (no Minecraft/AE2 needed).
     testImplementation platform("org.junit:junit-bom:5.10.2")
     testImplementation "org.junit.jupiter:junit-jupiter"
@@ -96,6 +104,7 @@ publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
+            artifactId = mod_id
         }
     }
     repositories {
