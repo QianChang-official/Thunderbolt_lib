@@ -3,6 +3,7 @@ package com.qianchang.ae2lt_core.crafting.ae2;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import appeng.crafting.CraftingPlan;
 import appeng.crafting.inv.ChildCraftingSimulationState;
 import appeng.crafting.inv.CraftingSimulationState;
 
+import com.qianchang.ae2lt_core.crafting.core.BoundedCombinations;
 import com.qianchang.ae2lt_core.crafting.core.CraftGraph;
 import com.qianchang.ae2lt_core.crafting.core.CraftInput;
 import com.qianchang.ae2lt_core.crafting.core.CraftOutput;
@@ -70,11 +72,13 @@ public final class FastCraftingPlanner {
     /**
      * Hard-fuzzy budget: an input slot that accepts several substitutes is expanded into the cartesian
      * product of concrete choices, each becoming a competing recipe the v2 planner selects among by
-     * availability. If a pattern's product of substitute counts exceeds this, the pattern is skipped
-     * (its absence surfaces as missing) rather than exploding the graph — "超步数报缺失" for non-cyclic
-     * fuzzy.
+     * availability. If a pattern's product of substitute counts exceeds this, we DON'T drop the recipe
+     * (that would be a false negative for something AE2 can craft); instead we greedily keep the best
+     * {@code FUZZY_NONCYCLE_STEPS} combinations — the lowest rank-sum over per-slot, most-available-first
+     * ordered options — bounding the graph without losing the cheapest routes ("贪心前 N" for non-cyclic
+     * fuzzy).
      */
-    static final long FUZZY_NONCYCLE_STEPS = 32;
+    static final long FUZZY_NONCYCLE_STEPS = 64;
 
     /**
      * Cyclic-fuzzy budget. A durability tool {@code 1·A(n) + 1·B → 1·C + A(n-1)} forms a degradation
@@ -152,6 +156,9 @@ public final class FastCraftingPlanner {
                                       Map<AEKey, DurabilityChain<AEKey>> durability) {
         Set<AEKey> seen = new HashSet<>();
         Deque<AEKey> queue = new ArrayDeque<>();
+        // Memoized "how much is already in the network" per key (SIMULATE probe), used to rank fuzzy
+        // substitutes most-available-first so the bounded keep-best-32 picks the cheapest routes.
+        Map<AEKey, Long> availability = new HashMap<>();
         seen.add(root);
         queue.add(root);
 
@@ -230,20 +237,32 @@ public final class FastCraftingPlanner {
                     if (opts.isEmpty()) {
                         return false; // slot only satisfiable by catalyst/container/tool -> defer to AE2
                     }
+                    // Rank this slot's substitutes most-available-first. When the full OR-product
+                    // overruns the budget we keep only the best `FUZZY_NONCYCLE_STEPS` combinations
+                    // (lowest rank-sum), so the cheapest/in-stock routes survive instead of the recipe
+                    // being dropped wholesale.
+                    if (opts.size() > 1) {
+                        for (CraftInput<AEKey> o : opts) {
+                            availability.computeIfAbsent(o.key(),
+                                k -> Math.max(0L, snapshot.extract(k, Long.MAX_VALUE, Actionable.SIMULATE)));
+                        }
+                        opts.sort(Comparator.comparingLong(
+                            (CraftInput<AEKey> o) -> availability.get(o.key())).reversed());
+                    }
                     slotOptions.add(opts);
-                    combos *= opts.size();
-                }
-                if (combos > FUZZY_NONCYCLE_STEPS) {
-                    // Non-cyclic fuzzy beyond budget: skip this recipe; if nothing else covers `key`
-                    // it surfaces as missing ("超步报缺失"). Other recipes for `key` may still apply.
-                    continue;
+                    // Saturating product: a raw `combos *= opts.size()` can overflow Long for patterns
+                    // with many fuzzy slots over large tags, wrapping to a small value that slips past
+                    // the budget check below. Sat.mul clamps so the budget comparison stays correct.
+                    combos = Sat.mul(combos, opts.size());
                 }
                 if (combos > 1) {
                     multiplePaths[0] = true; // fuzzy expanded into competing recipes
                 }
                 // For a craftable durability tool, one firing makes one full tool = n uses.
                 long outAmount = Sat.mul(primary.amount(), outputScale);
-                emitCombinations(builder, seen, queue, key, outAmount, byproducts, slotOptions, details);
+                // Keep the best (lowest rank-sum) up to FUZZY_NONCYCLE_STEPS combinations; when the
+                // product is within budget this emits all of them, otherwise it greedily keeps the front.
+                emitBestCombinations(builder, seen, queue, key, outAmount, byproducts, slotOptions, details);
             }
         }
         return true;
@@ -288,38 +307,23 @@ public final class FastCraftingPlanner {
     }
 
     /**
-     * Emit one {@link CraftPattern} per cartesian combination of the per-slot substitute options. All
-     * share the same {@code source} {@link IPatternDetails} (so AE2 fires the one real pattern and
-     * resolves the fuzzy slot from whatever the plan charged as used); the v2 planner treats them as
-     * competing recipes and picks per availability.
+     * Emit up to {@link #FUZZY_NONCYCLE_STEPS} {@link CraftPattern}s for the per-slot substitute options,
+     * choosing the lowest rank-sum (most-available-first) combinations when the full cartesian product
+     * exceeds the budget. All share the same {@code source} {@link IPatternDetails} (so AE2 fires the one
+     * real pattern and resolves the fuzzy slot from whatever the plan charged as used); the v2 planner
+     * treats them as competing recipes and picks per availability.
      */
-    private static void emitCombinations(CraftGraph.Builder<AEKey> builder, Set<AEKey> seen, Deque<AEKey> queue,
+    private static void emitBestCombinations(CraftGraph.Builder<AEKey> builder, Set<AEKey> seen, Deque<AEKey> queue,
                                          AEKey key, long outputAmount, List<CraftOutput<AEKey>> byproducts,
                                          List<List<CraftInput<AEKey>>> slotOptions, IPatternDetails source) {
-        int n = slotOptions.size();
-        int[] idx = new int[n];
-        while (true) {
-            List<CraftInput<AEKey>> coreInputs = new ArrayList<>(n);
-            for (int s = 0; s < n; s++) {
-                CraftInput<AEKey> opt = slotOptions.get(s).get(idx[s]);
-                coreInputs.add(opt);
+        for (List<CraftInput<AEKey>> coreInputs
+                : BoundedCombinations.bestFirst(slotOptions, (int) FUZZY_NONCYCLE_STEPS)) {
+            for (CraftInput<AEKey> opt : coreInputs) {
                 if (seen.add(opt.key())) {
                     queue.add(opt.key());
                 }
             }
             builder.pattern(new CraftPattern<>(key, outputAmount, coreInputs, byproducts, source));
-
-            int s = n - 1;
-            while (s >= 0) {
-                if (++idx[s] < slotOptions.get(s).size()) {
-                    break;
-                }
-                idx[s] = 0;
-                s--;
-            }
-            if (s < 0) {
-                break;
-            }
         }
     }
 

@@ -41,6 +41,11 @@ public final class Sat {
         if (value >= SAT) {
             return SAT;
         }
-        return (value + div - 1) / div;
+        if (value == 0) {
+            return 0;
+        }
+        // (value - 1) / div + 1 == ceil(value / div) without the "+ div" that could overflow for a
+        // huge divisor (value - 1 < SAT, so no addition ever wraps).
+        return (value - 1) / div + 1;
     }
 }
